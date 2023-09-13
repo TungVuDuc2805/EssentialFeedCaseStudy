@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		DF4AD80E2AB22A59005F9AB9 /* RemoteFeedLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4AD80D2AB22A59005F9AB9 /* RemoteFeedLoader.swift */; };
+		DF4AD8102AB22A92005F9AB9 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF4AD80F2AB22A92005F9AB9 /* HTTPClient.swift */; };
 		DFE60D1E2AB2155C0028E630 /* EssentialFeed.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DFE60D152AB2155B0028E630 /* EssentialFeed.framework */; };
 		DFE60D2E2AB215710028E630 /* FeedItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE60D2D2AB215710028E630 /* FeedItem.swift */; };
 		DFE60D302AB215C40028E630 /* FeedLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFE60D2F2AB215C40028E630 /* FeedLoader.swift */; };
@@ -26,6 +27,7 @@
 
 /* Begin PBXFileReference section */
 		DF4AD80D2AB22A59005F9AB9 /* RemoteFeedLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteFeedLoader.swift; sourceTree = "<group>"; };
+		DF4AD80F2AB22A92005F9AB9 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		DFE60D152AB2155B0028E630 /* EssentialFeed.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = EssentialFeed.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFE60D1D2AB2155C0028E630 /* EssentialFeedTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = EssentialFeedTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DFE60D2D2AB215710028E630 /* FeedItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedItem.swift; sourceTree = "<group>"; };
@@ -77,6 +79,7 @@
 			children = (
 				DFE60D312AB2163B0028E630 /* Feed Feature */,
 				DF4AD80D2AB22A59005F9AB9 /* RemoteFeedLoader.swift */,
+				DF4AD80F2AB22A92005F9AB9 /* HTTPClient.swift */,
 			);
 			path = EssentialFeed;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 			files = (
 				DFE60D302AB215C40028E630 /* FeedLoader.swift in Sources */,
 				DF4AD80E2AB22A59005F9AB9 /* RemoteFeedLoader.swift in Sources */,
+				DF4AD8102AB22A92005F9AB9 /* HTTPClient.swift in Sources */,
 				DFE60D2E2AB215710028E630 /* FeedItem.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
