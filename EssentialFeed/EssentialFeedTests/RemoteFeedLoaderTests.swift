@@ -8,7 +8,7 @@
 import XCTest
 
 protocol HTTPClient {
-    func get(from url: URL, completion: @escaping (Error) -> Void)
+    func get(from url: URL, completion: @escaping (HTTPURLResponse?, Error?) -> Void)
 }
 
 class RemoteFeedLoader {
@@ -17,6 +17,7 @@ class RemoteFeedLoader {
     
     enum Error: Swift.Error {
         case connectivity
+        case invalidData
     }
     
     init(url: URL, client: HTTPClient) {
@@ -25,8 +26,12 @@ class RemoteFeedLoader {
     }
     
     func load(completion: @escaping (Error) -> Void = { _ in }) {
-        client.get(from: url) { _ in
-            completion(.connectivity)
+        client.get(from: url) { _, error in
+            if error != nil {
+                completion(.connectivity)
+            } else {
+                completion(.invalidData)
+            }
         }
     }
 }
@@ -71,6 +76,19 @@ class RemoteFeedLoaderTests: XCTestCase {
         XCTAssertEqual(capturedError, .connectivity)
     }
     
+    func test_load_deliversError_onNon200HTTPResponse() {
+        let (sut, client) = makeSUT()
+
+        var capturedError: RemoteFeedLoader.Error?
+        sut.load {
+            capturedError = $0
+        }
+        
+        client.completeWith(statusCode: 300)
+        
+        XCTAssertEqual(capturedError, .invalidData)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(url: URL = URL(string: "any-url.com")!) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
         let client = HTTPClientSpy()
@@ -81,16 +99,22 @@ class RemoteFeedLoaderTests: XCTestCase {
     
     private class HTTPClientSpy: HTTPClient {
         var requestedURLs = [URL]()
-        var completions = [(Error) -> Void]()
+        var completions = [(HTTPURLResponse?, Error?) -> Void]()
         
-        func get(from url: URL, completion: @escaping (Error) -> Void) {
+        func get(from url: URL, completion: @escaping (HTTPURLResponse?, Error?) -> Void) {
             requestedURLs.append(url)
             completions.append(completion)
         }
         
         func completeWithError(at index: Int = 0) {
             let error = NSError(domain: "test", code: 0)
-            completions[index](error)
+            completions[index](nil, error)
+        }
+        
+        func completeWith(statusCode code: Int, at index: Int = 0) {
+            let response = HTTPURLResponse(url: requestedURLs[index], statusCode: code, httpVersion: nil, headerFields: nil)
+            
+            completions[index](response, nil)
         }
     }
     
