@@ -6,41 +6,7 @@
 //
 
 import XCTest
-
-enum HTTPClientResult {
-    case success(HTTPURLResponse)
-    case failure(Error)
-}
-
-protocol HTTPClient {
-    func get(from url: URL, completion: @escaping (HTTPClientResult) -> Void)
-}
-
-class RemoteFeedLoader {
-    private let url: URL
-    private let client: HTTPClient
-    
-    enum Error: Swift.Error {
-        case connectivity
-        case invalidData
-    }
-    
-    init(url: URL, client: HTTPClient) {
-        self.url = url
-        self.client = client
-    }
-    
-    func load(completion: @escaping (Error) -> Void = { _ in }) {
-        client.get(from: url) { result in
-            switch result {
-            case .failure:
-                completion(.connectivity)
-            case .success:
-                completion(.invalidData)
-            }
-        }
-    }
-}
+import EssentialFeed
 
 class RemoteFeedLoaderTests: XCTestCase {
     
