@@ -15,7 +15,7 @@ class RemoteFeedLoader {
     private let url: URL
     private let client: HTTPClient
     
-    init(url: URL = URL(string: "https://a-url.com")!, client: HTTPClient) {
+    init(url: URL, client: HTTPClient) {
         self.url = url
         self.client = client
     }
