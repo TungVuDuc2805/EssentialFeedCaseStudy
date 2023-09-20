@@ -42,7 +42,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
     
     func test_load_deliversImagesOnNonExpirationCache() {
         let currentDate = Date()
-        let nonExpirationDate = currentDate.addExpirationDate().adding(second: 1)
+        let nonExpirationDate = currentDate.toExpirationDate().adding(second: 1)
         
         let (sut, store) = makeSUT(currentDate: { currentDate })
         let (items, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
@@ -110,7 +110,7 @@ extension Date {
         return 7
     }
     
-    func addExpirationDate() -> Date {
+    func toExpirationDate() -> Date {
         let calendar = Calendar.current
         return calendar.date(byAdding: .day, value: -expirationDate, to: self)!
     }
