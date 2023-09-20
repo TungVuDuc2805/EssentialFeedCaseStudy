@@ -57,16 +57,20 @@ class LocalFeedLoader {
         store.deleteCachedFeed { [weak self] deletionError in
             guard self != nil else { return }
             if deletionError == nil {
-                self?.store.insert(items) { insertionError in
-                    guard self != nil else { return }
-                    if insertionError != nil {
-                        completion(Error.insertionError)
-                    } else {
-                        completion(nil)
-                    }
-                }
+                self?.insert(items, completion)
             } else {
                 completion(Error.deletionError)
+            }
+        }
+    }
+    
+    private func insert(_ items: [FeedItem], _ completion: @escaping (Error?) -> Void) {
+        store.insert(items) { [weak self] insertionError in
+            guard self != nil else { return }
+            if insertionError != nil {
+                completion(Error.insertionError)
+            } else {
+                completion(nil)
             }
         }
     }
