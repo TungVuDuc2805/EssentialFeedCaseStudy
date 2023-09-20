@@ -45,7 +45,7 @@ public class RemoteFeedLoader: FeedLoader {
 }
 
 extension Array where Element == RemoteFeedItem {
-    var feed: [FeedItem] {
+    var feed: [FeedImage] {
         self.map { $0.toModel }
     }
 }

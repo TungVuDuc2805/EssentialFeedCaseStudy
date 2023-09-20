@@ -10,8 +10,8 @@ import EssentialFeed
 
 final class EssentialFeedAPIEndToEndTests: XCTestCase {
     
-    func test_endToEndTestServerGETFeedImagesResult_matchesFixedTestData() {
-        let result = getFeedImages()
+    func test_endToEndTestServerGETImageFeedResult_matchesFixedTestData() {
+        let result = getImageFeed()
         switch result {
         case .failure(let error):
             XCTFail("Expected successfully but got \(error) instead")
@@ -28,7 +28,7 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
         }
     }
     
-    private func getFeedImages() -> RemoteFeedLoader.Result {
+    private func getImageFeed() -> RemoteFeedLoader.Result {
         let session = URLSession(configuration: .ephemeral)
         let client = URLSessionHTTPClient(session: session)
         let sut = RemoteFeedLoader(url: feedTestServerURL, client: client)
@@ -50,8 +50,8 @@ final class EssentialFeedAPIEndToEndTests: XCTestCase {
         return URL(string: "https://essentialdeveloper.com/feed-case-study/test-api/feed")!
     }
     
-    private func expectedImage(at index: Int) -> FeedItem {
-        return FeedItem(
+    private func expectedImage(at index: Int) -> FeedImage {
+        return FeedImage(
             id: id(at: index),
             description: description(at: index),
             location: location(at: index),

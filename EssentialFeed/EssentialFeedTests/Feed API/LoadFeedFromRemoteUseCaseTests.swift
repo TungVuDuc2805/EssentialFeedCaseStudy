@@ -109,7 +109,7 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
     }
     
     private func emptyJSONData() -> Data {
-        let json: [String: [FeedItem]] = [
+        let json: [String: [FeedImage]] = [
             "items": []
         ]
         return try! JSONSerialization.data(withJSONObject: json)
@@ -120,8 +120,8 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         description: String? = "any description",
         location: String? = "any location",
         image: URL
-    ) -> (model: FeedItem, json: [String: String]) {
-        let item = FeedItem(id: id, description: description, location: location, imageURL: image)
+    ) -> (model: FeedImage, json: [String: String]) {
+        let item = FeedImage(id: id, description: description, location: location, imageURL: image)
         
         let itemJSON = [
             "id": item.id.uuidString,
@@ -141,9 +141,8 @@ class LoadFeedFromRemoteUseCaseTests: XCTestCase {
         return try! JSONSerialization.data(withJSONObject: json)
     }
     
-    private func assert(_ sut: RemoteFeedLoader, toCompleteWithItems items: [FeedItem], when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
-        
-        var capturedFeed: [FeedItem]?
+    private func assert(_ sut: RemoteFeedLoader, toCompleteWithItems items: [FeedImage], when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+        var capturedFeed: [FeedImage]?
         sut.load { result in
             switch result {
             case .success(let feed):
