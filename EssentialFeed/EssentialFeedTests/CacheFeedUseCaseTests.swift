@@ -35,6 +35,10 @@ class FeedStore {
     func completeInsertionWith(_ error: Error, at index: Int = 0) {
         insertionCompletions[index](error)
     }
+    
+    func completeInsertionSuccessfully(at index: Int = 0) {
+        insertionCompletions[index](nil)
+    }
 }
 
 class LocalFeedLoader {
@@ -55,6 +59,8 @@ class LocalFeedLoader {
                 self?.store.insert(items) { insertionError in
                     if insertionError != nil {
                         completion(Error.insertionError)
+                    } else {
+                        completion(nil)
                     }
                 }
             } else {
@@ -133,6 +139,25 @@ class CacheFeedUseCaseTests: XCTestCase {
         store.completeInsertionWith(insertionError)
         
         XCTAssertEqual(capturedError, .insertionError)
+    }
+    
+    func test_save_delviersNoErrorOnCacheInsertionSuccessfully() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+
+        var capturedError: LocalFeedLoader.Error?
+        let exp = expectation(description: "wait for completion")
+        
+        sut.save(items) {
+            capturedError = $0
+            exp.fulfill()
+        }
+        
+        store.completeDeletionSuccessfully()
+        store.completeInsertionSuccessfully()
+        
+        wait(for: [exp], timeout: 0.1)
+        XCTAssertNil(capturedError)
     }
     
     // MARK: - Helpers
