@@ -66,24 +66,14 @@ class RemoteFeedLoaderTests: XCTestCase {
     func test_load_deliversEmptyFeed_on200HTTPResponseWithEmptyJSONList() {
         let (sut, client) = makeSUT()
         
-        var capturedFeed: [FeedItem]?
-        sut.load { result in
-            switch result {
-            case .success(let feed):
-                capturedFeed = feed
-            case .failure:
-                break
-            }
-        }
-        
         let json: [String: [FeedItem]] = [
             "items": []
         ]
         let data = try! JSONSerialization.data(withJSONObject: json)
         
-        client.completeWith(data: data, statusCode: 200)
-        
-        XCTAssertEqual(capturedFeed, [])
+        assert(sut, toCompleteWithItems: []) {
+            client.completeWith(data: data, statusCode: 200)
+        }
     }
     
     func test_load_deliversFeedItems_on200HTTPResponseWithJSONItems() {
@@ -109,6 +99,22 @@ class RemoteFeedLoaderTests: XCTestCase {
             "items": [item1JSON, item2JSON]
         ]
         
+        let data = try! JSONSerialization.data(withJSONObject: json)
+        assert(sut, toCompleteWithItems: [item1, item2]) {
+            client.completeWith(data: data, statusCode: 200)
+        }
+    }
+    
+    // MARK: - Helpers
+    private func makeSUT(url: URL = URL(string: "any-url.com")!) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
+        let client = HTTPClientSpy()
+        let sut = RemoteFeedLoader(url: url, client: client)
+        
+        return (sut, client)
+    }
+    
+    private func assert(_ sut: RemoteFeedLoader, toCompleteWithItems items: [FeedItem], when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+        
         var capturedFeed: [FeedItem]?
         sut.load { result in
             switch result {
@@ -119,18 +125,9 @@ class RemoteFeedLoaderTests: XCTestCase {
             }
         }
         
-        let data = try! JSONSerialization.data(withJSONObject: json)
-        client.completeWith(data: data, statusCode: 200)
+        action()
         
-        XCTAssertEqual(capturedFeed, [item1, item2])
-    }
-    
-    // MARK: - Helpers
-    private func makeSUT(url: URL = URL(string: "any-url.com")!) -> (sut: RemoteFeedLoader, client: HTTPClientSpy) {
-        let client = HTTPClientSpy()
-        let sut = RemoteFeedLoader(url: url, client: client)
-        
-        return (sut, client)
+        XCTAssertEqual(capturedFeed, items)
     }
     
     private func assert(_ sut: RemoteFeedLoader, toCompleteWithError error: RemoteFeedLoader.Error, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
