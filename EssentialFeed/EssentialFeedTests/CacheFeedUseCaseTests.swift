@@ -12,7 +12,8 @@ class FeedStore {
     var deleteCachedFeedCallCount = 0
     var insertionCachedFeedCallCount = 0
     var deletionCompletions = [(Error?) -> Void]()
-    
+    var insertionCompletions = [(Error?) -> Void]()
+
     func deleteCachedFeed(completion: @escaping (Error?) -> Void) {
         deleteCachedFeedCallCount += 1
         deletionCompletions.append(completion)
@@ -26,8 +27,13 @@ class FeedStore {
         deletionCompletions[index](nil)
     }
     
-    func insert(_ items: [FeedItem]) {
+    func insert(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
         insertionCachedFeedCallCount += 1
+        insertionCompletions.append(completion)
+    }
+    
+    func completeInsertionWith(_ error: Error, at index: Int = 0) {
+        insertionCompletions[index](error)
     }
 }
 
@@ -36,6 +42,7 @@ class LocalFeedLoader {
     
     enum Error: Swift.Error {
         case deletionError
+        case insertionError
     }
     
     init(store: FeedStore) {
@@ -43,9 +50,13 @@ class LocalFeedLoader {
     }
     
     func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        store.deleteCachedFeed { [weak self] error in
-            if error == nil {
-                self?.store.insert(items)
+        store.deleteCachedFeed { [weak self] deletionError in
+            if deletionError == nil {
+                self?.store.insert(items) { insertionError in
+                    if insertionError != nil {
+                        completion(Error.insertionError)
+                    }
+                }
             } else {
                 completion(Error.deletionError)
             }
@@ -105,6 +116,23 @@ class CacheFeedUseCaseTests: XCTestCase {
         store.completeDeletionWith(deletionError)
 
         XCTAssertEqual(capturedError, .deletionError)
+    }
+    
+    func test_save_deliversErrorOnCacheInsertionError() {
+        let (sut, store) = makeSUT()
+        let items = [uniqueItem(), uniqueItem()]
+        let insertionError = NSError(domain: "test", code: 0)
+
+        var capturedError: LocalFeedLoader.Error?
+        
+        sut.save(items) {
+            capturedError = $0
+        }
+        
+        store.completeDeletionSuccessfully()
+        store.completeInsertionWith(insertionError)
+        
+        XCTAssertEqual(capturedError, .insertionError)
     }
     
     // MARK: - Helpers
