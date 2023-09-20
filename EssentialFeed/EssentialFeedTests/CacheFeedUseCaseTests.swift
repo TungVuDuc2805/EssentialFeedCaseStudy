@@ -58,6 +58,7 @@ class LocalFeedLoader {
             guard self != nil else { return }
             if deletionError == nil {
                 self?.store.insert(items) { insertionError in
+                    guard self != nil else { return }
                     if insertionError != nil {
                         completion(Error.insertionError)
                     } else {
@@ -151,6 +152,25 @@ class CacheFeedUseCaseTests: XCTestCase {
         
         sut = nil
         store.completeDeletionWith(deletionError)
+
+        XCTAssertNil(capturedResult)
+    }
+    
+    func test_save_doesNotDeliverResultAfterInsertionAndSUTInstanceHasBeenDeallocated() {
+        let store = FeedStore()
+        var sut: LocalFeedLoader? = LocalFeedLoader(store: store)
+        let items = [uniqueItem(), uniqueItem()]
+        let insertionError = NSError(domain: "test", code: 0)
+
+        var capturedResult: LocalFeedLoader.Error?
+        
+        sut?.save(items) {
+            capturedResult = $0
+        }
+        
+        store.completeDeletionSuccessfully()
+        sut = nil
+        store.completeInsertionWith(insertionError)
 
         XCTAssertNil(capturedResult)
     }
