@@ -11,9 +11,7 @@ on:
 
 jobs:
   build:
-
     runs-on: macos-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Xcode Setup
@@ -22,4 +20,4 @@ jobs:
         xcode-version: '14.2.0'
     - name: Build & Test
       working-directory: ./EssentialFeed
-      run: xcodebuild clean build test -project EssentialFeed.xcodeproj -scheme "CI" CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO
+      run: xcodebuild clean build test -project EssentialFeed.xcodeproj -scheme "CI" -sdk iphoneos -destination "platform=iOS Simulator,OS=16.1,name=iPhone 14 Pro Max" CODE_SIGN_IDENTITY="" CODE_SIGN_REQUIRED=NO
