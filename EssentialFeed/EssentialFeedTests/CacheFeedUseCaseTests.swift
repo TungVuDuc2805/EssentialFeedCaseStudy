@@ -8,37 +8,12 @@
 import XCTest
 import EssentialFeed
 
-class FeedStore {
-    var deleteCachedFeedCallCount = 0
-    var insertionCachedFeedCallCount = 0
-    var deletionCompletions = [(Error?) -> Void]()
-    var insertionCompletions = [(Error?) -> Void]()
+protocol FeedStore {
+    typealias DeletionCompletion = (Error?) -> Void
+    typealias InsertionCompletion = (Error?) -> Void
 
-    func deleteCachedFeed(completion: @escaping (Error?) -> Void) {
-        deleteCachedFeedCallCount += 1
-        deletionCompletions.append(completion)
-    }
-    
-    func completeDeletionWith(_ error: Error, at index: Int = 0) {
-        deletionCompletions[index](error)
-    }
-    
-    func completeDeletionSuccessfully(at index: Int = 0) {
-        deletionCompletions[index](nil)
-    }
-    
-    func insert(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
-        insertionCachedFeedCallCount += 1
-        insertionCompletions.append(completion)
-    }
-    
-    func completeInsertionWith(_ error: Error, at index: Int = 0) {
-        insertionCompletions[index](error)
-    }
-    
-    func completeInsertionSuccessfully(at index: Int = 0) {
-        insertionCompletions[index](nil)
-    }
+    func deleteCachedFeed(completion: @escaping DeletionCompletion)
+    func insert(_ items: [FeedItem], completion: @escaping InsertionCompletion)
 }
 
 class LocalFeedLoader {
@@ -143,7 +118,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     }
     
     func test_save_doesNotDeliverResultAfterDeletionAndSUTInstanceHasBeenDeallocated() {
-        let store = FeedStore()
+        let store = FeedStoreSpy()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store)
         let items = [uniqueItem(), uniqueItem()]
         let deletionError = NSError(domain: "test", code: 0)
@@ -161,7 +136,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     }
     
     func test_save_doesNotDeliverResultAfterInsertionAndSUTInstanceHasBeenDeallocated() {
-        let store = FeedStore()
+        let store = FeedStoreSpy()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store)
         let items = [uniqueItem(), uniqueItem()]
         let insertionError = NSError(domain: "test", code: 0)
@@ -180,8 +155,8 @@ class CacheFeedUseCaseTests: XCTestCase {
     }
     
     // MARK: - Helpers
-    func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStore) {
-        let store = FeedStore()
+    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
+        let store = FeedStoreSpy()
         let sut = LocalFeedLoader(store: store)
         
         trackForMemoryLeaks(store, file: file, line: line)
@@ -214,6 +189,39 @@ class CacheFeedUseCaseTests: XCTestCase {
         image: URL = URL(string: "any-url")!
     ) -> FeedItem {
         return FeedItem(id: id, description: description, location: location, imageURL: image)
+    }
+    
+    private class FeedStoreSpy: FeedStore {
+        var deleteCachedFeedCallCount = 0
+        var insertionCachedFeedCallCount = 0
+        var deletionCompletions = [(Error?) -> Void]()
+        var insertionCompletions = [(Error?) -> Void]()
+
+        func deleteCachedFeed(completion: @escaping (Error?) -> Void) {
+            deleteCachedFeedCallCount += 1
+            deletionCompletions.append(completion)
+        }
+        
+        func completeDeletionWith(_ error: Error, at index: Int = 0) {
+            deletionCompletions[index](error)
+        }
+        
+        func completeDeletionSuccessfully(at index: Int = 0) {
+            deletionCompletions[index](nil)
+        }
+        
+        func insert(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
+            insertionCachedFeedCallCount += 1
+            insertionCompletions.append(completion)
+        }
+        
+        func completeInsertionWith(_ error: Error, at index: Int = 0) {
+            insertionCompletions[index](error)
+        }
+        
+        func completeInsertionSuccessfully(at index: Int = 0) {
+            insertionCompletions[index](nil)
+        }
     }
     
 }
