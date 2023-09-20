@@ -19,9 +19,27 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_requestsCacheRetrieval() {
         let (sut, store) = makeSUT()
         
-        sut.load()
+        sut.load { _ in }
 
         XCTAssertEqual(store.messages, [.retrieve])
+    }
+    
+    func test_load_failsOnRetrievalError() {
+        let (sut, store) = makeSUT()
+        
+        var capturedError: LocalFeedLoader.Error?
+        sut.load { result in
+            switch result {
+            case .failure(let error as LocalFeedLoader.Error):
+                capturedError = error
+            case .failure, .success:
+                break
+            }
+        }
+        
+        store.completeRetrievalWith(anyNSError())
+
+        XCTAssertEqual(capturedError, .retrievalError)
     }
     
     // MARK: - Helpers

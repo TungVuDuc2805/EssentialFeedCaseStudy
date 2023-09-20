@@ -14,6 +14,7 @@ public class LocalFeedLoader {
     public enum Error: Swift.Error {
         case deletionError
         case insertionError
+        case retrievalError
     }
     
     public init(store: FeedStore, currentDate: @escaping () -> Date) {
@@ -43,8 +44,10 @@ public class LocalFeedLoader {
         }
     }
     
-    public func load() {
-        store.retrieve()
+    public func load(completion: @escaping (LoadFeedResult) -> Void) {
+        store.retrieve { _ in
+            completion(.failure(Error.retrievalError))
+        }
     }
 }
 
