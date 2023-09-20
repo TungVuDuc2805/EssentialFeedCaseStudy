@@ -168,9 +168,9 @@ class RemoteFeedLoaderTests: XCTestCase {
         var capturedErrors = [RemoteFeedLoader.Error]()
         sut.load { result in
             switch result {
-            case .failure(let error):
+            case .failure(let error as RemoteFeedLoader.Error):
                 capturedErrors.append(error)
-            case .success:
+            case .failure, .success:
                 break
             }
         }
