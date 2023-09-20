@@ -46,11 +46,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         
         let (sut, store) = makeSUT(currentDate: { currentDate })
         let (items, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
-        
-        sut.save(items) { _ in }
-        store.completeDeletionSuccessfully()
-        store.completeInsertionSuccessfully()
-        
+                
         assert(sut, toCompleteLoadWith: .success(items)) {
             store.completeRetrievalSuccessfully(with: locals, timestamp: nonExpirationDate)
         }
@@ -61,12 +57,8 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let expirationDate = currentDate.toExpirationDate()
         
         let (sut, store) = makeSUT(currentDate: { currentDate })
-        let (items, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
-        
-        sut.save(items) { _ in }
-        store.completeDeletionSuccessfully()
-        store.completeInsertionSuccessfully()
-        
+        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+                
         assert(sut, toCompleteLoadWith: .success([])) {
             store.completeRetrievalSuccessfully(with: locals, timestamp: expirationDate)
         }
