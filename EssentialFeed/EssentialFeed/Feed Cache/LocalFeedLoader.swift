@@ -10,7 +10,8 @@ import Foundation
 public class LocalFeedLoader {
     private let store: FeedStore
     private let currentDate: () -> Date
-    
+    private let calendar = Calendar(identifier: .gregorian)
+
     public enum Error: Swift.Error {
         case deletionError
         case insertionError
@@ -62,8 +63,9 @@ public class LocalFeedLoader {
     }
     
     private func validate(_ timestamp: Date) -> Bool {
-        let calendar = Calendar(identifier: .gregorian)
-        let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp)!
+        guard let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp) else {
+            return false
+        }
         
         return expirationDate > currentDate()
     }
