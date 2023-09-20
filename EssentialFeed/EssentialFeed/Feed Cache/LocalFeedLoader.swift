@@ -12,19 +12,21 @@ public protocol FeedStore {
     typealias InsertionCompletion = (Error?) -> Void
 
     func deleteCachedFeed(completion: @escaping DeletionCompletion)
-    func insert(_ items: [FeedItem], completion: @escaping InsertionCompletion)
+    func insert(_ items: [FeedItem], _ timestamp: Date, completion: @escaping InsertionCompletion)
 }
 
 public class LocalFeedLoader {
     private let store: FeedStore
+    private let currentDate: () -> Date
     
     public enum Error: Swift.Error {
         case deletionError
         case insertionError
     }
     
-    public init(store: FeedStore) {
+    public init(store: FeedStore, currentDate: @escaping () -> Date) {
         self.store = store
+        self.currentDate = currentDate
     }
     
     public func save(_ items: [FeedItem], completion: @escaping (Error?) -> Void) {
@@ -39,7 +41,7 @@ public class LocalFeedLoader {
     }
     
     private func insert(_ items: [FeedItem], _ completion: @escaping (Error?) -> Void) {
-        store.insert(items) { [weak self] insertionError in
+        store.insert(items, currentDate()) { [weak self] insertionError in
             guard self != nil else { return }
             if insertionError != nil {
                 completion(Error.insertionError)
