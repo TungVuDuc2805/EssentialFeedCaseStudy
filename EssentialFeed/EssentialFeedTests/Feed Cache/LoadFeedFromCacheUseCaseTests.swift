@@ -64,6 +64,18 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         }
     }
     
+    func test_load_deliversNoImagesOnExpiratedCache() {
+        let currentDate = Date()
+        let expirationDate = currentDate.toExpirationDate().adding(second: -1)
+        
+        let (sut, store) = makeSUT(currentDate: { currentDate })
+        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+                
+        assert(sut, toCompleteLoadWith: .success([])) {
+            store.completeRetrievalSuccessfully(with: locals, timestamp: expirationDate)
+        }
+    }
+    
     // MARK: - Helpers
     private func makeSUT(currentDate: @escaping () -> Date = Date.init, file: StaticString = #file, line: UInt = #line) -> (sut: LocalFeedLoader, store: FeedStoreSpy) {
         let store = FeedStoreSpy()
