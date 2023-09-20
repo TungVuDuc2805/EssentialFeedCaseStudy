@@ -27,7 +27,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_failsOnRetrievalError() {
         let (sut, store) = makeSUT()
         
-        assert(sut, toCompleteWith: .failure(LocalFeedLoader.Error.retrievalError)) {
+        assert(sut, toCompleteLoadWith: .failure(LocalFeedLoader.Error.retrievalError)) {
             store.completeRetrievalWith(anyNSError())
         }
     }
@@ -35,7 +35,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
     func test_load_deliversNoImagesOnEmptyCache() {
         let (sut, store) = makeSUT()
         
-        assert(sut, toCompleteWith: .success([])) {
+        assert(sut, toCompleteLoadWith: .success([])) {
             store.completeRetrievalSuccessfullyWithEmptyCache()
         }
     }
@@ -51,7 +51,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         store.completeDeletionSuccessfully()
         store.completeInsertionSuccessfully()
         
-        assert(sut, toCompleteWith: .success(items)) {
+        assert(sut, toCompleteLoadWith: .success(items)) {
             store.completeRetrievalSuccessfully(with: locals, timestamp: nonExpirationDate)
         }
     }
@@ -67,7 +67,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         store.completeDeletionSuccessfully()
         store.completeInsertionSuccessfully()
         
-        assert(sut, toCompleteWith: .success([])) {
+        assert(sut, toCompleteLoadWith: .success([])) {
             store.completeRetrievalSuccessfully(with: locals, timestamp: expirationDate)
         }
     }
@@ -83,7 +83,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         return (sut, store)
     }
     
-    private func assert(_ sut: LocalFeedLoader, toCompleteWith expectedResult: LoadFeedResult, file: StaticString = #file, line: UInt = #line, when action: () -> Void) {
+    private func assert(_ sut: LocalFeedLoader, toCompleteLoadWith expectedResult: LoadFeedResult, file: StaticString = #file, line: UInt = #line, when action: () -> Void) {
         let exp = expectation(description: "wait for completion")
         
         sut.load { receivedResult in
