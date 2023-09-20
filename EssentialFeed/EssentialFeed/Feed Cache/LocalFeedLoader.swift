@@ -47,7 +47,7 @@ public class LocalFeedLoader {
 extension Array where Element == FeedImage {
     var toLocals: [LocalFeedImage] {
         self.map {
-            LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL)
+            LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)
         }
     }
 }

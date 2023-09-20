@@ -14,6 +14,6 @@ internal struct RemoteFeedItem: Decodable {
     let image: URL
     
     var toModel: FeedImage {
-        FeedImage(id: id, description: description, location: location, imageURL: image)
+        FeedImage(id: id, description: description, location: location, url: image)
     }
 }
