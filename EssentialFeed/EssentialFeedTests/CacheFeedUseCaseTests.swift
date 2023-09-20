@@ -39,12 +39,12 @@ class CacheFeedUseCaseTests: XCTestCase {
     func test_save_requestsNewCacheInsertionWithTimestmapOnDeletionSuccessfully() {
         let timestamp = Date()
         let (sut, store) = makeSUT(currentDate: { timestamp })
-        let items = [uniqueItem(), uniqueItem()]
+        let (items, locals) = uniqueItems([uniqueItem(), uniqueItem()])
         
         sut.save(items) { _ in }
         store.completeDeletionSuccessfully()
 
-        XCTAssertEqual(store.messages, [.deletion, .insertion(items: items, timestamp: timestamp)])
+        XCTAssertEqual(store.messages, [.deletion, .insertion(items: locals, timestamp: timestamp)])
     }
     
     func test_save_deliversErrorOnDeletionError() {
@@ -149,10 +149,16 @@ class CacheFeedUseCaseTests: XCTestCase {
         return FeedItem(id: id, description: description, location: location, imageURL: image)
     }
     
+    private func uniqueItems(_ models: [FeedItem]) -> (models: [FeedItem], locals: [LocalFeedItem]) {
+        let locals = models.map { LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL) }
+
+        return (models, locals)
+    }
+    
     private class FeedStoreSpy: FeedStore {
         enum Messages: Equatable {
             case deletion
-            case insertion(items: [FeedItem], timestamp: Date)
+            case insertion(items: [LocalFeedItem], timestamp: Date)
         }
         
         var messages = [Messages]()
@@ -172,7 +178,7 @@ class CacheFeedUseCaseTests: XCTestCase {
             deletionCompletions[index](nil)
         }
         
-        func insert(_ items: [FeedItem], _ timestamp: Date, completion: @escaping (Error?) -> Void) {
+        func insert(_ items: [LocalFeedItem], _ timestamp: Date, completion: @escaping (Error?) -> Void) {
             messages.append(.insertion(items: items, timestamp: timestamp))
             insertionCompletions.append(completion)
         }

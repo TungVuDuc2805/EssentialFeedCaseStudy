@@ -33,13 +33,21 @@ public class LocalFeedLoader {
     }
     
     private func insert(_ items: [FeedItem], _ completion: @escaping (Error?) -> Void) {
-        store.insert(items, currentDate()) { [weak self] insertionError in
+        store.insert(items.toLocals, currentDate()) { [weak self] insertionError in
             guard self != nil else { return }
             if insertionError != nil {
                 completion(Error.insertionError)
             } else {
                 completion(nil)
             }
+        }
+    }
+}
+
+extension Array where Element == FeedItem {
+    var toLocals: [LocalFeedItem] {
+        self.map {
+            LocalFeedItem(id: $0.id, description: $0.description, location: $0.location, imageURL: $0.imageURL)
         }
     }
 }
