@@ -56,12 +56,6 @@ class CacheFeedUseCaseTests: XCTestCase {
         return (sut, store)
     }
     
-    private func trackForMemoryLeaks(_ instance: AnyObject, file: StaticString = #file, line: UInt = #line) {
-        addTeardownBlock { [weak instance] in
-            XCTAssertNil(instance, "Instance should have been deallocated.Potential memory leaks.", file: file, line: line)
-        }
-    }
-    
     private func uniqueItem(
         id: UUID = UUID(),
         description: String? = "any description",
