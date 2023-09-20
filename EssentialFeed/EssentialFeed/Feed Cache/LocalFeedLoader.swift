@@ -52,15 +52,20 @@ public class LocalFeedLoader {
             case .empty:
                 completion(.success([]))
             case let .success(timestamp, locals):
-                let calendar = Calendar.current
-                let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp)!
-                if expirationDate > self.currentDate() {
+                if validate(timestamp) {
                     completion(.success(locals.toModels))
                 } else {
                     completion(.success([]))
                 }
             }
         }
+    }
+    
+    private func validate(_ timestamp: Date) -> Bool {
+        let calendar = Calendar(identifier: .gregorian)
+        let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp)!
+        
+        return expirationDate > currentDate()
     }
 }
 

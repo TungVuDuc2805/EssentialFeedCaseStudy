@@ -131,12 +131,12 @@ extension Date {
     }
     
     func toExpirationDate() -> Date {
-        let calendar = Calendar.current
+        let calendar = Calendar(identifier: .gregorian)
         return calendar.date(byAdding: .day, value: -expirationDate, to: self)!
     }
     
     func adding(second: Int) -> Date {
-        let calendar = Calendar.current
+        let calendar = Calendar(identifier: .gregorian)
         return calendar.date(byAdding: .second, value: second, to: self)!
     }
 }
