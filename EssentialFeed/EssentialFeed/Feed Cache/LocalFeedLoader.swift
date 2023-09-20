@@ -45,14 +45,20 @@ public class LocalFeedLoader {
     }
     
     public func load(completion: @escaping (LoadFeedResult) -> Void) {
-        store.retrieve { result in
+        store.retrieve { [unowned self] result in
             switch result {
             case .failure:
                 completion(.failure(Error.retrievalError))
             case .empty:
                 completion(.success([]))
-            case let .success(_, locals):
-                completion(.success(locals.toModels))
+            case let .success(timestamp, locals):
+                let calendar = Calendar.current
+                let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp)!
+                if expirationDate > self.currentDate() {
+                    completion(.success(locals.toModels))
+                } else {
+                    completion(.success([]))
+                }
             }
         }
     }
