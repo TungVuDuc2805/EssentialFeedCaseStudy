@@ -11,30 +11,38 @@ import EssentialFeed
 final class EssentialFeedAPIEndToEndTests: XCTestCase {
     
     func test_endToEndTestServerGETFeedImagesResult_matchesFixedTestData() {
+        let result = getFeedImages()
+        switch result {
+        case .failure(let error):
+            XCTFail("Expected successfully but got \(error) instead")
+        case .success(let items):
+            XCTAssertEqual(items.count, 8, "Expected 8 images in the test account image feed")
+            XCTAssertEqual(items[0], expectedImage(at: 0))
+            XCTAssertEqual(items[1], expectedImage(at: 1))
+            XCTAssertEqual(items[2], expectedImage(at: 2))
+            XCTAssertEqual(items[3], expectedImage(at: 3))
+            XCTAssertEqual(items[4], expectedImage(at: 4))
+            XCTAssertEqual(items[5], expectedImage(at: 5))
+            XCTAssertEqual(items[6], expectedImage(at: 6))
+            XCTAssertEqual(items[7], expectedImage(at: 7))
+        }
+    }
+    
+    private func getFeedImages() -> RemoteFeedLoader.Result {
         let session = URLSession(configuration: .ephemeral)
         let client = URLSessionHTTPClient(session: session)
         let sut = RemoteFeedLoader(url: feedTestServerURL, client: client)
         let exp = expectation(description: "Wait for completion")
         
+        var capturedResult: RemoteFeedLoader.Result!
         sut.load { result in
-            switch result {
-            case .failure(let error):
-                XCTFail("Expected successfully but got \(error) instead")
-            case .success(let items):
-                XCTAssertEqual(items.count, 8, "Expected 8 images in the test account image feed")
-                XCTAssertEqual(items[0], self.expectedImage(at: 0))
-                XCTAssertEqual(items[1], self.expectedImage(at: 1))
-                XCTAssertEqual(items[2], self.expectedImage(at: 2))
-                XCTAssertEqual(items[3], self.expectedImage(at: 3))
-                XCTAssertEqual(items[4], self.expectedImage(at: 4))
-                XCTAssertEqual(items[5], self.expectedImage(at: 5))
-                XCTAssertEqual(items[6], self.expectedImage(at: 6))
-                XCTAssertEqual(items[7], self.expectedImage(at: 7))
-            }
+            capturedResult = result
             exp.fulfill()
         }
         
         wait(for: [exp], timeout: 5.0)
+        
+        return capturedResult
     }
     
     // MARK: - Helpers
