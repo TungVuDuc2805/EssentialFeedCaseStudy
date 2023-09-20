@@ -8,6 +8,7 @@
 import Foundation
 
 public enum RetrievalResult {
+    case empty
     case success(timestamp: Date, locals: [LocalFeedImage])
     case failure(Error)
 }

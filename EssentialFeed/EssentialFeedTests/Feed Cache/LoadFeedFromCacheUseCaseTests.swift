@@ -36,7 +36,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
         
         assert(sut, toCompleteWith: .success([])) {
-            store.completeRetrievalSuccessfully(with: [], timestamp: Date())
+            store.completeRetrievalSuccessfullyWithEmptyCache()
         }
     }
     

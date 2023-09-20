@@ -49,6 +49,8 @@ public class LocalFeedLoader {
             switch result {
             case .failure:
                 completion(.failure(Error.retrievalError))
+            case .empty:
+                completion(.success([]))
             case let .success(_, locals):
                 completion(.success(locals.toModels))
             }
