@@ -37,9 +37,15 @@ public class RemoteFeedLoader: FeedLoader {
     
     private func map(_ data: Data, from response: HTTPURLResponse) -> Result {
         if let feedItems = try? FeedItemsMapper.map(data, response) {
-            return .success(feedItems)
+            return .success(feedItems.feed)
         } else {
             return .failure(Error.invalidData)
         }
+    }
+}
+
+extension Array where Element == RemoteFeedItem {
+    var feed: [FeedItem] {
+        self.map { $0.toModel }
     }
 }
