@@ -45,8 +45,13 @@ public class LocalFeedLoader {
     }
     
     public func load(completion: @escaping (LoadFeedResult) -> Void) {
-        store.retrieve { _ in
-            completion(.failure(Error.retrievalError))
+        store.retrieve { result in
+            switch result {
+            case .failure:
+                completion(.failure(Error.retrievalError))
+            case .success:
+                completion(.success([]))
+            }
         }
     }
 }
