@@ -36,7 +36,23 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let (sut, store) = makeSUT()
         
         assert(sut, toCompleteWith: .success([])) {
-            store.completeRetrievalSuccessfully(with: [])
+            store.completeRetrievalSuccessfully(with: [], timestamp: Date())
+        }
+    }
+    
+    func test_load_deliversImagesOnNonExpirationCache() {
+        let currentDate = Date()
+        let nonExpirationDate = currentDate.addExpirationDate().adding(second: 1)
+        
+        let (sut, store) = makeSUT(currentDate: { currentDate })
+        let (items, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+        
+        sut.save(items) { _ in }
+        store.completeDeletionSuccessfully()
+        store.completeInsertionSuccessfully()
+        
+        assert(sut, toCompleteWith: .success(items)) {
+            store.completeRetrievalSuccessfully(with: locals, timestamp: nonExpirationDate)
         }
     }
     
@@ -72,4 +88,35 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         wait(for: [exp], timeout: 0.1)
     }
     
+    private func uniqueFeedImage(
+        id: UUID = UUID(),
+        description: String? = "any description",
+        location: String? = "any location",
+        image: URL = URL(string: "any-url")!
+    ) -> FeedImage {
+        return FeedImage(id: id, description: description, location: location, url: image)
+    }
+    
+    private func uniqueItems(_ models: [FeedImage]) -> (models: [FeedImage], locals: [LocalFeedImage]) {
+        let locals = models.map { LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url) }
+
+        return (models, locals)
+    }
+    
+}
+
+extension Date {
+    private var expirationDate: Int {
+        return 7
+    }
+    
+    func addExpirationDate() -> Date {
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .day, value: -expirationDate, to: self)!
+    }
+    
+    func adding(second: Int) -> Date {
+        let calendar = Calendar.current
+        return calendar.date(byAdding: .second, value: second, to: self)!
+    }
 }

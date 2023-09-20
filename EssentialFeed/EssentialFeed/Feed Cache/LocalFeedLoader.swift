@@ -49,8 +49,8 @@ public class LocalFeedLoader {
             switch result {
             case .failure:
                 completion(.failure(Error.retrievalError))
-            case .success:
-                completion(.success([]))
+            case let .success(_, locals):
+                completion(.success(locals.toModels))
             }
         }
     }
@@ -60,6 +60,15 @@ extension Array where Element == FeedImage {
     var toLocals: [LocalFeedImage] {
         self.map {
             LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)
+        }
+    }
+}
+
+
+extension Array where Element == LocalFeedImage {
+    var toModels: [FeedImage] {
+        self.map {
+            FeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)
         }
     }
 }
