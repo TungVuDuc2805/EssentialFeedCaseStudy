@@ -13,7 +13,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     func test_doesNotDeleteCacheUponCreation() {
         let (_, store) = makeSUT()
 
-        XCTAssertEqual(store.deleteCachedFeedCallCount, 0)
+        XCTAssertEqual(store.messages, [])
     }
     
     func test_save_requestsCacheDeletion() {
@@ -22,7 +22,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         
         sut.save(items) { _ in }
 
-        XCTAssertEqual(store.deleteCachedFeedCallCount, 1)
+        XCTAssertEqual(store.messages, [.deletion])
     }
     
     func test_save_doesNotRequestsCacheInsertionOnDeletionError() {
@@ -33,20 +33,10 @@ class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items) { _ in }
         store.completeDeletionWith(deletionError)
 
-        XCTAssertEqual(store.insertions.count, 0)
+        XCTAssertEqual(store.messages, [.deletion])
     }
     
-    func test_save_requestsNewCacheInsertionOnDeletionSuccessfully() {
-        let (sut, store) = makeSUT()
-        let items = [uniqueItem(), uniqueItem()]
-        
-        sut.save(items) { _ in }
-        store.completeDeletionSuccessfully()
-
-        XCTAssertEqual(store.insertions.count, 1)
-    }
-    
-    func test_save_requestsNewCacheInsertionWithTimestampOnDeletionSuccessfully() {
+    func test_save_requestsNewCacheInsertionWithTimestmapOnDeletionSuccessfully() {
         let timestamp = Date()
         let (sut, store) = makeSUT(currentDate: { timestamp })
         let items = [uniqueItem(), uniqueItem()]
@@ -54,7 +44,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         sut.save(items) { _ in }
         store.completeDeletionSuccessfully()
 
-        XCTAssertEqual(store.insertions, [.insertions(items: items, timestamp: timestamp)])
+        XCTAssertEqual(store.messages, [.deletion, .insertion(items: items, timestamp: timestamp)])
     }
     
     func test_save_deliversErrorOnDeletionError() {
@@ -161,15 +151,16 @@ class CacheFeedUseCaseTests: XCTestCase {
     
     private class FeedStoreSpy: FeedStore {
         enum Messages: Equatable {
-            case insertions(items: [FeedItem], timestamp: Date)
+            case deletion
+            case insertion(items: [FeedItem], timestamp: Date)
         }
-        var insertions = [Messages]()
-        var deleteCachedFeedCallCount = 0
+        
+        var messages = [Messages]()
         var deletionCompletions = [(Error?) -> Void]()
         var insertionCompletions = [(Error?) -> Void]()
 
         func deleteCachedFeed(completion: @escaping (Error?) -> Void) {
-            deleteCachedFeedCallCount += 1
+            messages.append(.deletion)
             deletionCompletions.append(completion)
         }
         
@@ -182,7 +173,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         }
         
         func insert(_ items: [FeedItem], _ timestamp: Date, completion: @escaping (Error?) -> Void) {
-            insertions.append(.insertions(items: items, timestamp: timestamp))
+            messages.append(.insertion(items: items, timestamp: timestamp))
             insertionCompletions.append(completion)
         }
         
