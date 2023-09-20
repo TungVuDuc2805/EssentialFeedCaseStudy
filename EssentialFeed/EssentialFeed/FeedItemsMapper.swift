@@ -8,7 +8,7 @@
 import Foundation
 
 internal class FeedItemsMapper {
-    struct Root: Decodable {
+    private struct Root: Decodable {
         let items: [RemoteFeedItem]
         
         var feed: [FeedItem] {
@@ -16,7 +16,7 @@ internal class FeedItemsMapper {
         }
     }
 
-    struct RemoteFeedItem: Decodable {
+    private struct RemoteFeedItem: Decodable {
         let id: UUID
         let description: String?
         let location: String?
@@ -27,7 +27,7 @@ internal class FeedItemsMapper {
         }
     }
     
-    static var OK_200: Int {
+    private static var OK_200: Int {
         return 200
     }
 
