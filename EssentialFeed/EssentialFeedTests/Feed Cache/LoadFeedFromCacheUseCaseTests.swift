@@ -107,7 +107,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.messages, [.retrieve])
     }
     
-    func test_load_deletesCacheOnExpirationCache() {
+    func test_load_hasNoSideEffectsOnExpirationCache() {
         let currentDate = Date()
         let expirationDate = currentDate.toExpirationDate()
         
@@ -117,10 +117,10 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         sut.load { _ in }
         store.completeRetrievalSuccessfully(with: locals, timestamp: expirationDate)
         
-        XCTAssertEqual(store.messages, [.retrieve, .deletion])
+        XCTAssertEqual(store.messages, [.retrieve])
     }
     
-    func test_load_deletesCacheOnExpiredCache() {
+    func test_load_hasNoSideEffectsOnExpiredCache() {
         let currentDate = Date()
         let expiredDate = currentDate.toExpirationDate().adding(second: -1)
         
@@ -130,7 +130,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         sut.load { _ in }
         store.completeRetrievalSuccessfully(with: locals, timestamp: expiredDate)
         
-        XCTAssertEqual(store.messages, [.retrieve, .deletion])
+        XCTAssertEqual(store.messages, [.retrieve])
     }
     
     func test_load_doesNotDeliverResultAfterSUTInstanceHasBeenDeallocated() {

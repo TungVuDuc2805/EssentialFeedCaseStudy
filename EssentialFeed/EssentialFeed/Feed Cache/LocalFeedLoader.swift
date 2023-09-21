@@ -58,7 +58,6 @@ public class LocalFeedLoader {
                     completion(.success(locals.toModels))
                 } else {
                     completion(.success([]))
-                    self.store.deleteCachedFeed { _ in }
                 }
             }
         }
@@ -70,7 +69,12 @@ public class LocalFeedLoader {
             switch result {
             case .failure:
                 store.deleteCachedFeed { _ in }
-            default: break
+            case .empty:
+                break
+            case let .success(timestamp, _):
+                if !validate(timestamp) {
+                    store.deleteCachedFeed { _ in }
+                }
             }
         }
     }
