@@ -94,7 +94,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(store.messages, [.retrieve])
     }
     
-    func test_load_doesNotDeleteCacheOnNonExpiredCache() {
+    func test_load_hasNoSideEffectsOnNonExpirationCache() {
         let currentDate = Date()
         let nonExpirationDate = currentDate.toExpirationDate().adding(second: 1)
         
