@@ -58,6 +58,7 @@ public class LocalFeedLoader {
                     completion(.success(locals.toModels))
                 } else {
                     completion(.success([]))
+                    store.deleteCachedFeed { _ in }
                 }
             }
         }
