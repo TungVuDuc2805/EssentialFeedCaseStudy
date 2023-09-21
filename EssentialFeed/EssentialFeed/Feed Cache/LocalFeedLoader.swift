@@ -11,7 +11,7 @@ public class LocalFeedLoader {
     private let store: FeedStore
     private let currentDate: () -> Date
     private let calendar = Calendar(identifier: .gregorian)
-
+    
     public enum Error: Swift.Error {
         case deletionError
         case insertionError
@@ -23,6 +23,17 @@ public class LocalFeedLoader {
         self.currentDate = currentDate
     }
     
+    
+    func validate(_ timestamp: Date) -> Bool {
+        guard let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp) else {
+            return false
+        }
+        
+        return expirationDate > currentDate()
+    }
+}
+
+extension LocalFeedLoader {
     public func save(_ items: [FeedImage], completion: @escaping (Error?) -> Void) {
         store.deleteCachedFeed { [weak self] deletionError in
             guard self != nil else { return }
@@ -44,7 +55,9 @@ public class LocalFeedLoader {
             }
         }
     }
-    
+}
+ 
+extension LocalFeedLoader {
     public func load(completion: @escaping (LoadFeedResult) -> Void) {
         store.retrieve { [weak self] result in
             guard let self = self else { return }
@@ -63,6 +76,9 @@ public class LocalFeedLoader {
         }
     }
     
+}
+  
+extension LocalFeedLoader {
     public func validateCache() {
         store.retrieve { [weak self] result in
             guard let self = self else { return }
@@ -77,14 +93,6 @@ public class LocalFeedLoader {
                 }
             }
         }
-    }
-    
-    private func validate(_ timestamp: Date) -> Bool {
-        guard let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp) else {
-            return false
-        }
-        
-        return expirationDate > currentDate()
     }
 }
 
