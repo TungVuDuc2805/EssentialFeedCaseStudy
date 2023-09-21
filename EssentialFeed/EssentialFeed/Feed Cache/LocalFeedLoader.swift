@@ -50,6 +50,7 @@ public class LocalFeedLoader {
             switch result {
             case .failure:
                 completion(.failure(Error.retrievalError))
+                store.deleteCachedFeed { _ in }
             case .empty:
                 completion(.success([]))
             case let .success(timestamp, locals):
