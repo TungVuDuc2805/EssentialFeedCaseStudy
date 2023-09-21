@@ -1,5 +1,5 @@
 //
-//  XCTestCase+Helpers.swift
+//  XCTestCase+SharedHelpers.swift
 //  EssentialFeedTests
 //
 //  Created by Tung Vu Duc on 20/09/2023.
