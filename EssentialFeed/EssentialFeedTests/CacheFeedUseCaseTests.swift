@@ -78,7 +78,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueFeedImage(), uniqueFeedImage()]
         let deletionError = NSError(domain: "test", code: 0)
 
-        var capturedResult: LocalFeedLoader.Error?
+        var capturedResult: Error?
         
         sut?.save(items) {
             capturedResult = $0
@@ -96,7 +96,7 @@ class CacheFeedUseCaseTests: XCTestCase {
         let items = [uniqueFeedImage(), uniqueFeedImage()]
         let insertionError = NSError(domain: "test", code: 0)
 
-        var capturedResult: LocalFeedLoader.Error?
+        var capturedResult: Error?
         
         sut?.save(items) {
             capturedResult = $0
@@ -120,10 +120,10 @@ class CacheFeedUseCaseTests: XCTestCase {
         return (sut, store)
     }
     
-    private func assert(_ sut: LocalFeedLoader, toCompleteWith error: LocalFeedLoader.Error?, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+    private func assert(_ sut: LocalFeedLoader, toCompleteWith error: LocalFeedLoader.SaveResult, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
         let items = [uniqueFeedImage(), uniqueFeedImage()]
 
-        var capturedError: LocalFeedLoader.Error?
+        var capturedError: Error?
         let exp = expectation(description: "wait for completion")
         
         sut.save(items) {

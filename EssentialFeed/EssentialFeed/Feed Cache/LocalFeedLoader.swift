@@ -16,9 +16,7 @@ public class LocalFeedLoader {
         self.store = store
         self.currentDate = currentDate
     }
-    
-    public typealias Error = Swift.Error
-    
+        
     func validate(_ timestamp: Date) -> Bool {
         guard let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp) else {
             return false
@@ -29,8 +27,9 @@ public class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
-
-    public func save(_ items: [FeedImage], completion: @escaping (Error?) -> Void) {
+    public typealias SaveResult = Error?
+    
+    public func save(_ items: [FeedImage], completion: @escaping (SaveResult) -> Void) {
         store.deleteCachedFeed { [weak self] deletionError in
             guard self != nil else { return }
             if deletionError == nil {
@@ -41,7 +40,7 @@ extension LocalFeedLoader {
         }
     }
     
-    private func insert(_ items: [FeedImage], _ completion: @escaping (Error?) -> Void) {
+    private func insert(_ items: [FeedImage], _ completion: @escaping (SaveResult) -> Void) {
         store.insert(items.toLocals, currentDate()) { [weak self] insertionError in
             guard self != nil else { return }
             if insertionError != nil {
@@ -54,7 +53,9 @@ extension LocalFeedLoader {
 }
  
 extension LocalFeedLoader: FeedLoader {
-    public func load(completion: @escaping (LoadFeedResult) -> Void) {
+    public typealias LoadResult = LoadFeedResult
+
+    public func load(completion: @escaping (LoadResult) -> Void) {
         store.retrieve { [weak self] result in
             guard let self = self else { return }
             switch result {
