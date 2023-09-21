@@ -12,17 +12,12 @@ public class LocalFeedLoader {
     private let currentDate: () -> Date
     private let calendar = Calendar(identifier: .gregorian)
     
-    public enum Error: Swift.Error {
-        case deletionError
-        case insertionError
-        case retrievalError
-    }
-    
     public init(store: FeedStore, currentDate: @escaping () -> Date) {
         self.store = store
         self.currentDate = currentDate
     }
     
+    public typealias Error = Swift.Error
     
     func validate(_ timestamp: Date) -> Bool {
         guard let expirationDate = calendar.date(byAdding: .day, value: 7, to: timestamp) else {
@@ -34,13 +29,14 @@ public class LocalFeedLoader {
 }
 
 extension LocalFeedLoader {
+
     public func save(_ items: [FeedImage], completion: @escaping (Error?) -> Void) {
         store.deleteCachedFeed { [weak self] deletionError in
             guard self != nil else { return }
             if deletionError == nil {
                 self?.insert(items, completion)
             } else {
-                completion(Error.deletionError)
+                completion(deletionError)
             }
         }
     }
@@ -49,7 +45,7 @@ extension LocalFeedLoader {
         store.insert(items.toLocals, currentDate()) { [weak self] insertionError in
             guard self != nil else { return }
             if insertionError != nil {
-                completion(Error.insertionError)
+                completion(insertionError)
             } else {
                 completion(nil)
             }
@@ -62,8 +58,8 @@ extension LocalFeedLoader: FeedLoader {
         store.retrieve { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .failure:
-                completion(.failure(Error.retrievalError))
+            case .failure(let error):
+                completion(.failure(error))
             case .empty:
                 completion(.success([]))
             case let .success(timestamp, locals):

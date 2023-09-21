@@ -49,7 +49,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     func test_save_deliversErrorOnDeletionError() {
         let (sut, store) = makeSUT()
         
-        assert(sut, toCompleteWith: .deletionError) {
+        assert(sut, toCompleteWith: anyNSError()) {
             store.completeDeletionWith(anyNSError())
         }
     }
@@ -57,7 +57,7 @@ class CacheFeedUseCaseTests: XCTestCase {
     func test_save_deliversErrorOnCacheInsertionError() {
         let (sut, store) = makeSUT()
         
-        assert(sut, toCompleteWith: .insertionError) {
+        assert(sut, toCompleteWith: anyNSError()) {
             store.completeDeletionSuccessfully()
             store.completeInsertionWith(anyNSError())
         }
@@ -134,6 +134,6 @@ class CacheFeedUseCaseTests: XCTestCase {
         action()
         
         wait(for: [exp], timeout: 0.1)
-        XCTAssertEqual(capturedError, error, file: file, line: line)
+        XCTAssertEqual(capturedError as NSError?, error as NSError?, file: file, line: line)
     }
 }
