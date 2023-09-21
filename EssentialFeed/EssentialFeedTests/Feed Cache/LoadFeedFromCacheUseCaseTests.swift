@@ -181,19 +181,3 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
     }
     
 }
-
-extension Date {
-    private var expirationDate: Int {
-        return 7
-    }
-    
-    func toExpirationDate() -> Date {
-        let calendar = Calendar(identifier: .gregorian)
-        return calendar.date(byAdding: .day, value: -expirationDate, to: self)!
-    }
-    
-    func adding(second: Int) -> Date {
-        let calendar = Calendar(identifier: .gregorian)
-        return calendar.date(byAdding: .second, value: second, to: self)!
-    }
-}
