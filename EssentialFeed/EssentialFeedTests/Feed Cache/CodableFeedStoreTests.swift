@@ -128,13 +128,13 @@ class CodableFeedStoreTests: XCTestCase {
     }
     
     // MARK: - Helpers
-    private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
+    private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {
         let sut = CodableFeedStore(url: url ?? storeURL())
         trackForMemoryLeaks(sut, file: file, line: line)
         return sut
     }
     
-    func expectRetrieve(from sut: CodableFeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
+    func expectRetrieve(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "wait for completion")
         sut.retrieve { receivedResult in
             switch (receivedResult, expectedResult) {
@@ -154,12 +154,12 @@ class CodableFeedStoreTests: XCTestCase {
         wait(for: [exp], timeout: 0.1)
     }
     
-    func expectRetrieveTwice(from sut: CodableFeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
+    func expectRetrieveTwice(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
         expectRetrieve(from: sut, completeWith: expectedResult)
         expectRetrieve(from: sut, completeWith: expectedResult)
     }
     
-    func deleteCache(from sut: CodableFeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
+    func deleteCache(from sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
         let exp = expectation(description: "wait for completion")
         
         var capturedError: Error?
@@ -174,7 +174,7 @@ class CodableFeedStoreTests: XCTestCase {
     }
     
     @discardableResult
-    func insert(_ items: [LocalFeedImage], _ timestamp: Date, to sut: CodableFeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
+    func insert(_ items: [LocalFeedImage], _ timestamp: Date, to sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
         let exp = expectation(description: "wait for completion")
         
         var capturedError: Error?
