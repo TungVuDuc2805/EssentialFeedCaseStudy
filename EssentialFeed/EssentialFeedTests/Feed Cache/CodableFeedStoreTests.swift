@@ -120,6 +120,20 @@ class CodableFeedStoreTests: XCTestCase {
         expectRetrieveTwice(from: sut, completeWith: .failure(anyNSError()))
     }
     
+    func test_insert_overridesPreviouslyInsertedCacheValues() {
+        let url = storeURL()
+        let sut = makeSUT(url: url)
+        let timestamp1 = Date.distantPast
+        let (_, locals1) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+        let timestamp2 = Date.distantFuture
+        let (_, locals2) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+
+        XCTAssertNil(insert(locals1, timestamp1, to: sut))
+        XCTAssertNil(insert(locals2, timestamp2, to: sut))
+
+        expectRetrieve(from: sut, completeWith: .success(timestamp: timestamp2, locals: locals2))
+    }
+    
     // MARK: - Helpers
     private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(url: url ?? storeURL())
@@ -152,14 +166,19 @@ class CodableFeedStoreTests: XCTestCase {
         expectRetrieve(from: sut, completeWith: expectedResult)
     }
     
-    func insert(_ items: [LocalFeedImage], _ timestamp: Date, to sut: CodableFeedStore, file: StaticString = #filePath, line: UInt = #line) {
+    @discardableResult
+    func insert(_ items: [LocalFeedImage], _ timestamp: Date, to sut: CodableFeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
         let exp = expectation(description: "wait for completion")
+        
+        var capturedError: Error?
         sut.insert(items, timestamp) { error in
-            XCTAssertNil(error, file: file, line: line)
+            capturedError = error
             exp.fulfill()
         }
         
         wait(for: [exp], timeout: 0.1)
+        
+        return capturedError
     }
     
     private func storeURL() -> URL {
