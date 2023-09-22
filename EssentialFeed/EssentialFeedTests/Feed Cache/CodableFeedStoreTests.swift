@@ -39,11 +39,15 @@ class CodableFeedStore {
             completion(.empty)
             return
         }
-        let cache = try! JSONDecoder().decode(CodableCache.self, from: data)
         
-        completion(.success(timestamp: cache.timestamp, locals: cache.items.map {
-            LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)
-        }))
+        do {
+            let cache = try JSONDecoder().decode(CodableCache.self, from: data)
+            completion(.success(timestamp: cache.timestamp, locals: cache.items.map {
+                LocalFeedImage(id: $0.id, description: $0.description, location: $0.location, url: $0.url)
+            }))
+        } catch {
+            completion(.failure(error))
+        }
     }
     
     func insert(_ items: [LocalFeedImage], _ timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
@@ -98,6 +102,14 @@ class CodableFeedStoreTests: XCTestCase {
         expectRetrieveTwice(from: sut, completeWith: .success(timestamp: timestamp, locals: locals))
     }
     
+    func test_retrieve_deliversFailureOnRetrievalError() {
+        let sut = makeSUT()
+        
+        try! "invalid data".write(to: storeURL(), atomically: false, encoding: .utf8)
+        
+        expectRetrieve(from: sut, completeWith: .failure(anyNSError()))
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(url: storeURL())
@@ -114,6 +126,8 @@ class CodableFeedStoreTests: XCTestCase {
             case let (.success(receivedTimestamp, receivedLocals), .success(expectedTimestamp, expectedLocals)):
                 XCTAssertEqual(expectedTimestamp, receivedTimestamp, file: file, line: line)
                 XCTAssertEqual(expectedLocals, receivedLocals, file: file, line: line)
+            case (.failure, .failure):
+                break
             default:
                 XCTFail("Expected \(expectedResult), but got \(receivedResult) instead")
             }
