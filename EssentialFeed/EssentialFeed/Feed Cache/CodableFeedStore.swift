@@ -7,7 +7,7 @@
 
 import Foundation
 
-public class CodableFeedStore {
+public class CodableFeedStore: FeedStore {
     struct CodableCache: Codable {
         let items: [CodableLocalFeedImage]
         let timestamp: Date
@@ -33,7 +33,7 @@ public class CodableFeedStore {
         self.url = url
     }
     
-    public func retrieve(completion: @escaping FeedStore.RetrievalCompletion) {
+    public func retrieve(completion: @escaping RetrievalCompletion) {
         guard let data = try? Data(contentsOf: url) else {
             completion(.empty)
             return
@@ -49,7 +49,7 @@ public class CodableFeedStore {
         }
     }
     
-    public func insert(_ items: [LocalFeedImage], _ timestamp: Date, completion: @escaping FeedStore.InsertionCompletion) {
+    public func insert(_ items: [LocalFeedImage], _ timestamp: Date, completion: @escaping InsertionCompletion) {
         let cache = CodableCache(items: items, timestamp: timestamp)
         let data = try! JSONEncoder().encode(cache)
         do {
@@ -60,7 +60,7 @@ public class CodableFeedStore {
         }
     }
     
-    public func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
+    public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         guard FileManager.default.fileExists(atPath: url.path) else {
             completion(nil)
             return
