@@ -27,6 +27,10 @@ extension XCTestCase {
 
         return (models, locals)
     }
+    
+    func anyUniqueItems() -> (models: [FeedImage], locals: [LocalFeedImage]) {
+        return uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+    }
 }
 
 extension Date {
