@@ -109,6 +109,41 @@ class CodableFeedStoreTests: XCTestCase {
         wait(for: [exp], timeout: 0.1)
     }
     
+    func test_retrieveTwiceAfterInsertingToEmptyCache_deliversInsertedValuesTwice() {
+        let sut = makeSUT()
+        let timestamp = Date()
+        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+        
+        let exp = expectation(description: "wait for completion")
+        sut.insert(locals, timestamp) { insertionError in
+            if let error = insertionError {
+                XCTFail("Expected insertion successfully but got \(error) instead")
+            } else {
+                sut.retrieve { firstResult in
+                    switch firstResult {
+                    case let .success(firstReceivedTimestamp, firstReceivedLocals):
+                        sut.retrieve { secondResult in
+                            switch secondResult {
+                            case let .success(secondReceivedTimestamp, secondReceivedLocals):
+                                XCTAssertEqual(timestamp, firstReceivedTimestamp)
+                                XCTAssertEqual(locals, firstReceivedLocals)
+                                XCTAssertEqual(timestamp, secondReceivedTimestamp)
+                                XCTAssertEqual(locals, secondReceivedLocals)
+                            default:
+                                XCTFail("Expected empty result, but got \(secondResult) instead")
+                            }
+                        }
+                    default:
+                        XCTFail("Expected empty result, but got \(firstResult) instead")
+                    }
+                }
+            }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(url: storeURL())
