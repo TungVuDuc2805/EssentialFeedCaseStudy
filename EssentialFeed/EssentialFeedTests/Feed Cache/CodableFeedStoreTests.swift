@@ -121,7 +121,7 @@ class CodableFeedStoreTests: XCTestCase {
     }
     
     func test_delete_deliversErrorOnDeletionError() {
-        let noPermissionURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let noPermissionURL = FileManager.default.urls(for: .cachesDirectory, in: .systemDomainMask).first!
         let sut = makeSUT(url: noPermissionURL)
         
         XCTAssertNotNil(deleteCache(from: sut))
