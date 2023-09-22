@@ -70,7 +70,7 @@ class CodableFeedStore {
             try FileManager.default.removeItem(at: url)
             completion(nil)
         } catch {
-            
+            completion(error)
         }
     }
 }
@@ -185,6 +185,13 @@ class CodableFeedStoreTests: XCTestCase {
         XCTAssertNil(deleteCache(from: sut))
         
         expectRetrieve(from: sut, completeWith: .empty)
+    }
+    
+    func test_delete_deliversErrorOnDeletionError() {
+        let noPermissionURL = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let sut = makeSUT(url: noPermissionURL)
+        
+        XCTAssertNotNil(deleteCache(from: sut))
     }
     
     // MARK: - Helpers
