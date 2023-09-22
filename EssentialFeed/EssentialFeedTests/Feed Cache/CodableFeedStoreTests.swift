@@ -62,7 +62,16 @@ class CodableFeedStore {
     }
     
     func deleteCachedFeed(completion: @escaping FeedStore.DeletionCompletion) {
-        completion(nil)
+        guard FileManager.default.fileExists(atPath: url.path) else {
+            completion(nil)
+            return
+        }
+        do {
+            try FileManager.default.removeItem(at: url)
+            completion(nil)
+        } catch {
+            
+        }
     }
 }
 
@@ -166,6 +175,18 @@ class CodableFeedStoreTests: XCTestCase {
         expectRetrieve(from: sut, completeWith: .empty)
     }
     
+    func test_delete_emptiesPreviouslyInsertedCache() {
+        let sut = makeSUT()
+        let timestamp = Date()
+        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
+        
+        insert(locals, timestamp, to: sut)
+        
+        XCTAssertNil(deleteCache(from: sut))
+        
+        expectRetrieve(from: sut, completeWith: .empty)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(url: url ?? storeURL())
@@ -185,7 +206,7 @@ class CodableFeedStoreTests: XCTestCase {
             case (.failure, .failure):
                 break
             default:
-                XCTFail("Expected \(expectedResult), but got \(receivedResult) instead")
+                XCTFail("Expected \(expectedResult), but got \(receivedResult) instead", file: file, line: line)
             }
             exp.fulfill()
         }
