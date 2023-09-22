@@ -158,6 +158,14 @@ class CodableFeedStoreTests: XCTestCase {
         expectRetrieve(from: sut, completeWith: .empty)
     }
     
+    func test_deleteTwice_hasNoSideEffectsOnEmptyCache() {
+        let sut = makeSUT()
+        
+        XCTAssertNil(deleteCache(from: sut))
+        XCTAssertNil(deleteCache(from: sut))
+        expectRetrieve(from: sut, completeWith: .empty)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> CodableFeedStore {
         let sut = CodableFeedStore(url: url ?? storeURL())
