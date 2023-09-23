@@ -198,61 +198,6 @@ class CodableFeedStoreTests: XCTestCase, CodableFeedStoreSpecs {
         return sut
     }
     
-    func expectRetrieve(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
-        let exp = expectation(description: "wait for completion")
-        sut.retrieve { receivedResult in
-            switch (receivedResult, expectedResult) {
-            case (.empty, .empty):
-                break
-            case let (.success(receivedTimestamp, receivedLocals), .success(expectedTimestamp, expectedLocals)):
-                XCTAssertEqual(expectedTimestamp, receivedTimestamp, file: file, line: line)
-                XCTAssertEqual(expectedLocals, receivedLocals, file: file, line: line)
-            case (.failure, .failure):
-                break
-            default:
-                XCTFail("Expected \(expectedResult), but got \(receivedResult) instead", file: file, line: line)
-            }
-            exp.fulfill()
-        }
-        
-        wait(for: [exp], timeout: 0.1)
-    }
-    
-    func expectRetrieveTwice(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
-        expectRetrieve(from: sut, completeWith: expectedResult)
-        expectRetrieve(from: sut, completeWith: expectedResult)
-    }
-    
-    @discardableResult
-    func deleteCache(from sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
-        let exp = expectation(description: "wait for completion")
-        
-        var capturedError: Error?
-        sut.deleteCachedFeed {
-            capturedError = $0
-            exp.fulfill()
-        }
-
-        wait(for: [exp], timeout: 0.1)
-        
-        return capturedError
-    }
-    
-    @discardableResult
-    func insert(_ items: [LocalFeedImage], _ timestamp: Date, to sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) -> Error? {
-        let exp = expectation(description: "wait for completion")
-        
-        var capturedError: Error?
-        sut.insert(items, timestamp) { error in
-            capturedError = error
-            exp.fulfill()
-        }
-        
-        wait(for: [exp], timeout: 0.1)
-        
-        return capturedError
-    }
-    
     private func storeURL() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).store")
     }
