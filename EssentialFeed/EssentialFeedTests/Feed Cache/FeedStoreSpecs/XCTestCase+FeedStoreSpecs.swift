@@ -1,48 +1,14 @@
 //
-//  FeedCacheSpecs.swift
+//  XCTestCase+FeedStoreSpecs.swift
 //  EssentialFeedTests
 //
-//  Created by Tung Vu Duc on 23/09/2023.
+//  Created by Tung Vu Duc on 25/09/2023.
 //
 
 import XCTest
 import EssentialFeed
 
-protocol FeedCacheSpecs {
-    func test_retrieve_deliversEmptyOnEmptyCache()
-    func test_retrieveTwice_deliversEmptyTwiceOnEmptyCache()
-    func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues()
-    func test_retrieveTwiceAfterInsertingToEmptyCache_deliversInsertedValuesTwice()
-
-    func test_insert_deliversNoErrorOnEmptyCache()
-    func test_insert_deliversNoErrorOnNonEmptyCache()
-    func test_insert_overridesPreviouslyInsertedCacheValues()
-
-    func test_delete_deliversNoErrorOnEmptyCache()
-    func test_deleteTwice_hasNoSideEffectsOnEmptyCache()
-    func test_delete_deliversNoErrorOnNonEmptyCache()
-    func test_delete_emptiesPreviouslyInsertedCache()
-
-    func test_storeSideEffects_runSerially()
-}
-
-protocol FailableRetrieveFeedStoreSpecs: FeedCacheSpecs {
-    func test_retrieve_deliversFailureOnRetrievalError()
-    func test_retrieveTwice_deliversFailureTwiceOnRetrievalError()
-}
-
-protocol FailableInsertFeedStoreSpecs: FeedCacheSpecs {
-    func test_insert_deliversErrorOnInsertionError()
-    func test_insert_hasNoSideEffectsOnInsertionError()
-}
-
-protocol FailableDeleteFeedStoreSpecs: FeedCacheSpecs {
-    func test_delete_deliversErrorOnDeletionError()
-}
-
-typealias CodableFeedStoreSpecs = FeedCacheSpecs & FailableRetrieveFeedStoreSpecs & FailableInsertFeedStoreSpecs & FailableDeleteFeedStoreSpecs
-
-extension FeedCacheSpecs where Self: XCTestCase {
+extension FeedStoreSpecs where Self: XCTestCase {
     func expectRetrieveDeliversEmptyOnEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         expectRetrieve(from: sut, completeWith: .empty, file: file, line: line)
     }
@@ -181,50 +147,5 @@ extension FeedCacheSpecs where Self: XCTestCase {
         wait(for: [exp], timeout: 0.1)
         
         return capturedError
-    }
-}
-
-extension FailableInsertFeedStoreSpecs where Self: XCTestCase {
-    func expectRetrieveDeliversFailureOnRetrieveError(on sut: FeedStore, url: URL, file: StaticString = #filePath, line: UInt = #line) {
-        
-        try! "invalid data".write(to: url, atomically: false, encoding: .utf8)
-        
-        expectRetrieve(from: sut, completeWith: .failure(anyNSError()), file: file, line: line)
-    }
-    
-    func expectRetrieveDeliversFailureTwiceOnRetrieveError(on sut: FeedStore, url: URL, file: StaticString = #filePath, line: UInt = #line) {
-        
-        try! "invalid data".write(to: url, atomically: false, encoding: .utf8)
-        
-        expectRetrieve(from: sut, completeWith: .failure(anyNSError()), file: file, line: line)
-    }
-}
-
-extension FailableInsertFeedStoreSpecs where Self: XCTestCase {
-    func expectInsertDeliversErrorOnInsertionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
-        let timestamp = Date.distantPast
-        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
-
-        XCTAssertNotNil(insert(locals, timestamp, to: sut), "Expected cache insertion to fail with an error")
-    }
-    
-    func expectInsertHasNoSideEffectsInsertionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
-        let timestamp = Date.distantPast
-        let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
-        
-        insert(locals, timestamp, to: sut)
-
-        expectRetrieve(from: sut, completeWith: .empty)
-    }
-}
-
-extension FailableDeleteFeedStoreSpecs where Self: XCTestCase {
-    func expectDeleteDeliversErrorOnDeletionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertNotNil(deleteCache(from: sut), file: file, line: line)
-    }
-    
-    func expectDeleteHasNoSideEffectsOnDeletionError(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
-        deleteCache(from: sut)
-        expectRetrieve(from: sut, completeWith: .empty)
     }
 }
