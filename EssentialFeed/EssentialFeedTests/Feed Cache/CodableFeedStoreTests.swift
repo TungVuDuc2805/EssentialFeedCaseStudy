@@ -116,28 +116,7 @@ class CodableFeedStoreTests: XCTestCase, CodableFeedStoreSpecs {
     
     func test_storeSideEffects_runSerially() {
         let sut = makeSUT()
-        var completions = [XCTestExpectation]()
-        
-        let op1 = expectation(description: "Operation 1")
-        sut.insert(anyUniqueItems().locals, Date()) { _ in
-            completions.append(op1)
-            op1.fulfill()
-        }
-        
-        let op2 = expectation(description: "Operation 2")
-        sut.deleteCachedFeed { _ in
-            completions.append(op2)
-            op2.fulfill()
-        }
-        
-        let op3 = expectation(description: "Operation 2")
-        sut.insert(anyUniqueItems().locals, Date()) { _ in
-            completions.append(op3)
-            op3.fulfill()
-        }
-        
-        waitForExpectations(timeout: 5.0)
-        XCTAssertEqual(completions, [op1, op2, op3])
+        expectStoreSideEffectsRunSerially(on: sut)
     }
     // MARK: - Helpers
     private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> FeedStore {

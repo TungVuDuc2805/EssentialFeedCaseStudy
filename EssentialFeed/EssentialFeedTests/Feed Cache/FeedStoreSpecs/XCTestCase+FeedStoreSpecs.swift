@@ -94,6 +94,31 @@ extension FeedStoreSpecs where Self: XCTestCase {
         expectRetrieve(from: sut, completeWith: .empty, file: file, line: line)
     }
     
+    func expectStoreSideEffectsRunSerially(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+        var completions = [XCTestExpectation]()
+        
+        let op1 = expectation(description: "Operation 1")
+        sut.insert(anyUniqueItems().locals, Date()) { _ in
+            completions.append(op1)
+            op1.fulfill()
+        }
+        
+        let op2 = expectation(description: "Operation 2")
+        sut.deleteCachedFeed { _ in
+            completions.append(op2)
+            op2.fulfill()
+        }
+        
+        let op3 = expectation(description: "Operation 2")
+        sut.insert(anyUniqueItems().locals, Date()) { _ in
+            completions.append(op3)
+            op3.fulfill()
+        }
+        
+        waitForExpectations(timeout: 5.0)
+        XCTAssertEqual(completions, [op1, op2, op3])
+    }
+    
     func expectRetrieve(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
         let exp = expectation(description: "wait for completion")
         sut.retrieve { receivedResult in
