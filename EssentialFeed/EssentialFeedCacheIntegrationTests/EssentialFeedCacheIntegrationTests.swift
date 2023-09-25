@@ -10,6 +10,18 @@ import EssentialFeed
 
 final class EssentialFeedCacheIntegrationTests: XCTestCase {
     
+    override func setUp() {
+        super.setUp()
+        
+        cleanCacheArtifacts()
+    }
+    
+    override func tearDown() {
+        super.tearDown()
+        
+        cleanCacheArtifacts()
+    }
+    
     func test_load_deliversNoItemsOnEmptyCache() {
         let sut = makeSUT()
         let exp = expectation(description: "wait for completion")
@@ -26,6 +38,34 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
         
         wait(for: [exp], timeout: 1.0)
     }
+    
+    func test_load_deliversItemsSavedOnSeparatedInstance() {
+        let sutToPerformSave = makeSUT()
+        let sutToPerformLoad = makeSUT()
+        let feed = anyUniqueItems()
+        
+        let exp1 = expectation(description: "wait for completion")
+        let exp2 = expectation(description: "wait for completion")
+
+        sutToPerformSave.save(feed.models) { error in
+            XCTAssertNil(error)
+            exp1.fulfill()
+        }
+        
+        wait(for: [exp1], timeout: 1.0)
+        
+        sutToPerformLoad.load { result in
+            switch result {
+            case .success(let receivedFeed):
+                XCTAssertEqual(feed.models, receivedFeed)
+            case .failure(let error):
+                XCTFail("Expect successfully feed result, but got \(error) instead")
+            }
+            exp2.fulfill()
+        }
+        
+        wait(for: [exp2], timeout: 1.0)
+    }
 
     // MARK: - Helpers
     private func makeSUT(url: URL? = nil, file: StaticString = #filePath, line: UInt = #line) -> LocalFeedLoader {
@@ -40,6 +80,10 @@ final class EssentialFeedCacheIntegrationTests: XCTestCase {
     
     private func storeURL() -> URL {
         return FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first!.appendingPathComponent("\(type(of: self)).store")
+    }
+    
+    private func cleanCacheArtifacts() {
+        try? FileManager.default.removeItem(at: storeURL())
     }
 
 }
