@@ -62,9 +62,11 @@ public final class FeedViewController: UITableViewController {
         cell.locationLabel.text = image.location
         cell.locationContainer.isHidden = image.location == nil
         cell.feedImageView.image = nil
+        cell.retryButton.isHidden = true
         tasks[indexPath] = imageLoader?.loadImageData(from: image.url) { result in
             let data = try? result.get()
             cell.feedImageView.image = data.map(UIImage.init) ?? nil
+            cell.retryButton.isHidden = data != nil
             cell.contentContainer.isShimmering = false
         }
         
