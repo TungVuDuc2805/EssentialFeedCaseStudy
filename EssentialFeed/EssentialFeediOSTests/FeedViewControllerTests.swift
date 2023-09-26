@@ -190,6 +190,29 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(view0?.isRetryButtonVisible, true)
     }
     
+    func test_retryAction_reloadsImage() {
+        let image0 = makeImage(url: URL(string: "https://url-0.com")!)
+        let image1 = makeImage(url: URL(string: "https://url-1.com")!)
+        let (sut, loader) = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+
+        let view0 = sut.simulateCellVisible(at: 0)
+        let view1 = sut.simulateCellVisible(at: 1)
+        
+        XCTAssertEqual(loader.loadedImages, [image0.url, image1.url])
+
+        loader.completeImageLoadingWithError(at: 0)
+        loader.completeImageLoadingWithError(at: 1)
+
+        view0?.simulateRetry()
+        XCTAssertEqual(loader.loadedImages, [image0.url, image1.url, image0.url])
+
+        view1?.simulateRetry()
+        XCTAssertEqual(loader.loadedImages, [image0.url, image1.url, image0.url, image1.url])
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedViewController, loader: LoaderSpy) {
         let loader = LoaderSpy()
@@ -331,6 +354,20 @@ extension FeedCell {
     
     var isRetryButtonVisible: Bool {
         return !retryButton.isHidden
+    }
+    
+    func simulateRetry() {
+        retryButton.simulateTap()
+    }
+}
+
+extension UIButton {
+    func simulateTap() {
+        allTargets.forEach { target in
+            actions(forTarget: target, forControlEvent: .touchUpInside)?.forEach {
+                (target as NSObject).perform(Selector($0))
+            }
+        }
     }
 }
 
