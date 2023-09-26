@@ -21,11 +21,11 @@ class FeedViewController: UITableViewController {
         
         refreshControl = UIRefreshControl()
         refreshControl?.addTarget(self, action: #selector(load), for: .valueChanged)
-        refreshControl?.beginRefreshing()
         load()
     }
     
     @objc func load() {
+        refreshControl?.beginRefreshing()
         loader?.load { [weak self] _ in
             self?.refreshControl?.endRefreshing()
         }
@@ -86,6 +86,21 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(sut.refreshControl?.isRefreshing, true)
     }
     
+    func test_pullToRefresh_hidesLoadingIndicatorOnLoaderCompletion() {
+        let (sut, loader) = makeSUT()
+        sut.loadViewIfNeeded()
+        
+        sut.simulatePullToRefresh()
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, true)
+        loader.completeFeedLoading(at: 0)
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, false)
+        
+        sut.simulatePullToRefresh()
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, true)
+        loader.completeFeedLoading(at: 1)
+        XCTAssertEqual(sut.refreshControl?.isRefreshing, false)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedViewController, loader: LoaderSpy) {
         let loader = LoaderSpy()
@@ -97,11 +112,12 @@ class FeedViewControllerTests: XCTestCase {
     }
         
     class LoaderSpy: FeedLoader {
-        private(set) var loadFeedCallCount: Int = 0
+        var loadFeedCallCount: Int {
+            completions.count
+        }
         private var completions = [(LoadFeedResult) -> Void]()
         
         func load(completion: @escaping (LoadFeedResult) -> Void) {
-            loadFeedCallCount += 1
             completions.append(completion)
         }
         
