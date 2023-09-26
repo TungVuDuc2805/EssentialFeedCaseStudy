@@ -14,7 +14,7 @@ public protocol Cancellable {
 }
 
 public protocol ImageLoader {
-    func loadImageData(from url: URL) -> Cancellable
+    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable
 }
 
 public final class FeedViewController: UITableViewController {
@@ -57,11 +57,14 @@ public final class FeedViewController: UITableViewController {
     public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = FeedCell()
         let image = feed[indexPath.row]
+        cell.contentContainer.isShimmering = true
         cell.descriptionLabel.text = image.description
         cell.locationLabel.text = image.location
         cell.locationContainer.isHidden = image.location == nil
         
-        tasks[indexPath] = imageLoader?.loadImageData(from: image.url)
+        tasks[indexPath] = imageLoader?.loadImageData(from: image.url) { _ in
+            cell.contentContainer.isShimmering = false
+        }
         
         return cell
     }

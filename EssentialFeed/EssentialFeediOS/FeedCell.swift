@@ -8,6 +8,7 @@
 import UIKit
 
 public final class FeedCell: UITableViewCell {
+    public let contentContainer = UIView()
     public let locationLabel = UILabel()
     public let descriptionLabel = UILabel()
     public let locationContainer = UIView()

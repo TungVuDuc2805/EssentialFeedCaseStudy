@@ -108,6 +108,29 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.loadedImages, [image0.url, image1.url])
     }
     
+    func test_feedImageViewLoadingIndicator_visibleWhileLoadingImage() {
+        let image0 = makeImage(url: URL(string: "https://url-0.com")!)
+        let image1 = makeImage(url: URL(string: "https://url-1.com")!)
+        let (sut, loader) = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+
+        let view0 = sut.simulateCellVisible(at: 0)
+        let view1 = sut.simulateCellVisible(at: 1)
+        
+        XCTAssertEqual(view0?.isShowingImageLoadingIndicator, true)
+        XCTAssertEqual(view1?.isShowingImageLoadingIndicator, true)
+
+        loader.completeImageLoading(at: 0)
+        XCTAssertEqual(view0?.isShowingImageLoadingIndicator, false)
+        XCTAssertEqual(view1?.isShowingImageLoadingIndicator, true)
+
+        loader.completeImageLoading(at: 1)
+        XCTAssertEqual(view0?.isShowingImageLoadingIndicator, false)
+        XCTAssertEqual(view1?.isShowingImageLoadingIndicator, false)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedViewController, loader: LoaderSpy) {
         let loader = LoaderSpy()
@@ -145,7 +168,7 @@ class FeedViewControllerTests: XCTestCase {
         var loadFeedCallCount: Int {
             completions.count
         }
-                
+        
         private var completions = [(LoadFeedResult) -> Void]()
         
         func load(completion: @escaping (LoadFeedResult) -> Void) {
@@ -163,6 +186,7 @@ class FeedViewControllerTests: XCTestCase {
         // MARK: - Image Load
         var loadedImages = [URL]()
         var cancelLoadedImages = [URL]()
+        var imageLoadCompletions = [(Result<Data, Error>) -> Void]()
         
         struct Task: Cancellable {
             var handler: () -> Void
@@ -170,13 +194,18 @@ class FeedViewControllerTests: XCTestCase {
                 handler()
             }
         }
-
-        func loadImageData(from url: URL) -> Cancellable {
+        
+        func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
             loadedImages.append(url)
+            imageLoadCompletions.append(completion)
             
             return Task {
                 self.cancelLoadedImages.append(url)
             }
+        }
+        
+        func completeImageLoading(at index: Int) {
+            imageLoadCompletions[index](.success(Data("any".utf8)))
         }
     }
     
@@ -225,5 +254,11 @@ extension UIRefreshControl {
                 (target as NSObject).perform(Selector($0))
             }
         }
+    }
+}
+
+extension FeedCell {
+    var isShowingImageLoadingIndicator: Bool {
+        return contentContainer.isShimmering
     }
 }
