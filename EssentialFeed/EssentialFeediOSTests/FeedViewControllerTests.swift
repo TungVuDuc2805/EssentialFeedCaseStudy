@@ -41,7 +41,7 @@ class FeedViewControllerTests: XCTestCase {
         
         sut.simulatePullToRefresh()
         XCTAssertEqual(sut.isFeedRefreshing, true)
-        loader.completeFeedLoading(at: 1)
+        loader.completeFeedLoadingWithError(at: 1)
         XCTAssertEqual(sut.isFeedRefreshing, false)
     }
     
