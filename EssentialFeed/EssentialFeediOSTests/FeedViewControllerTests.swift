@@ -222,11 +222,27 @@ class FeedViewControllerTests: XCTestCase {
         loader.completeFeedLoading(with: [image0, image1], at: 0)
         XCTAssertEqual(loader.loadedImages, [])
 
-        sut.simulateNearCellVisible(at: 0)
+        sut.simulateCellNearVisible(at: 0)
         XCTAssertEqual(loader.loadedImages, [image0.url])
 
-        sut.simulateNearCellVisible(at: 1)
+        sut.simulateCellNearVisible(at: 1)
         XCTAssertEqual(loader.loadedImages, [image0.url, image1.url])
+    }
+    
+    func test_feedImageView_cancelLoadsImageOnCellNotNearVisibleAnymore() {
+        let image0 = makeImage(url: URL(string: "https://url-0.com")!)
+        let image1 = makeImage(url: URL(string: "https://url-1.com")!)
+        let (sut, loader) = makeSUT()
+        
+        sut.loadViewIfNeeded()
+        loader.completeFeedLoading(with: [image0, image1], at: 0)
+        XCTAssertEqual(loader.cancelLoadedImages, [])
+
+        sut.simulateCellNotNearVisibleAnymore(at: 0)
+        XCTAssertEqual(loader.cancelLoadedImages, [image0.url])
+
+        sut.simulateCellNotNearVisibleAnymore(at: 1)
+        XCTAssertEqual(loader.cancelLoadedImages, [image0.url, image1.url])
     }
     
     // MARK: - Helpers
@@ -344,9 +360,15 @@ extension FeedViewController {
         delegate?.tableView?(tableView, didEndDisplaying: cell, forRowAt: IndexPath(row: index, section: feedImageSection))
     }
     
-    func simulateNearCellVisible(at index: Int) {
+    func simulateCellNearVisible(at index: Int) {
         let pf = tableView.prefetchDataSource
-        pf?.tableView(tableView, prefetchRowsAt: [IndexPath(row: index, section: 0)])
+        pf?.tableView(tableView, prefetchRowsAt: [IndexPath(row: index, section: feedImageSection)])
+    }
+    
+    func simulateCellNotNearVisibleAnymore(at index: Int) {
+        simulateCellNearVisible(at: index)
+        let pf = tableView.prefetchDataSource
+        pf?.tableView?(tableView, cancelPrefetchingForRowsAt: [IndexPath(row: index, section: feedImageSection)])
     }
     
     var feedImageSection: Int {
