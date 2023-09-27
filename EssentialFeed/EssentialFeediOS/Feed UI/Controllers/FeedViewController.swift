@@ -9,14 +9,6 @@ import Foundation
 import UIKit
 import EssentialFeed
 
-public protocol Cancellable {
-    func cancel()
-}
-
-public protocol ImageLoader {
-    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable
-}
-
 public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching {
     private var loader: FeedLoader?
     private var imageLoader: ImageLoader?
