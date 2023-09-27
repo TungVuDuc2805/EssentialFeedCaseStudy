@@ -13,7 +13,7 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
     private var refreshController: FeedRefreshViewController?
     private var imageLoader: ImageLoader?
     private var feed = [FeedImage]()
-    private var tasks = [IndexPath: Cancellable]()
+    private var cellControllers = [IndexPath: FeedImageCellController]()
     
     public convenience init(loader: FeedLoader, imageLoader: ImageLoader) {
         self.init()
@@ -38,50 +38,34 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
     }
     
     public override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = FeedCell()
-        let image = feed[indexPath.row]
-        cell.contentContainer.isShimmering = true
-        cell.descriptionLabel.text = image.description
-        cell.locationLabel.text = image.location
-        cell.locationContainer.isHidden = image.location == nil
-        cell.feedImageView.image = nil
-        cell.retryButton.isHidden = true
-        
-        let imageLoad = { [weak self, weak cell] in
-            guard let self = self else { return }
-            self.tasks[indexPath] = self.imageLoader?.loadImageData(from: image.url) { result in
-                let data = try? result.get()
-                let image = data.map(UIImage.init) ?? nil
-                cell?.feedImageView.image = image
-                cell?.retryButton.isHidden = image != nil
-                cell?.contentContainer.isShimmering = false
-            }
-        }
-        
-        imageLoad()
-        
-        cell.retry = imageLoad
-        
-        return cell
+        return cellController(at: indexPath).view()
     }
     
     public override func tableView(_ tableView: UITableView, didEndDisplaying cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cancelImageLoad(at: indexPath)
+        removeCell(at: indexPath)
     }
     
     public func tableView(_ tableView: UITableView, prefetchRowsAt indexPaths: [IndexPath]) {
         for indexPath in indexPaths {
-            let image = feed[indexPath.row]
-            tasks[indexPath] = imageLoader?.loadImageData(from: image.url) { _ in }
+            let controller = cellController(at: indexPath)
+            _ = controller.view()
         }
     }
     
     public func tableView(_ tableView: UITableView, cancelPrefetchingForRowsAt indexPaths: [IndexPath]) {
-        indexPaths.forEach { cancelImageLoad(at: $0) }
+        indexPaths.forEach { removeCell(at: $0) }
     }
     
-    private func cancelImageLoad(at indexPath: IndexPath) {
-        tasks[indexPath]?.cancel()
-        tasks[indexPath] = nil
+    private func removeCell(at indexPath: IndexPath) {
+        cellControllers[indexPath]?.cancelLoad()
+        cellControllers[indexPath] = nil
+    }
+    
+    private func cellController(at indexPath: IndexPath) -> FeedImageCellController {
+        let image = feed[indexPath.row]
+        let controller = FeedImageCellController(model: image, imageLoader: imageLoader!)
+        cellControllers[indexPath] = controller
+
+        return controller
     }
 }
