@@ -100,5 +100,6 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
     
     private func cancelImageLoad(at indexPath: IndexPath) {
         tasks[indexPath]?.cancel()
+        tasks[indexPath] = nil
     }
 }
