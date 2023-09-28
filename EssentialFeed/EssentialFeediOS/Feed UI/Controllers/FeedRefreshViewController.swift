@@ -9,7 +9,7 @@ import UIKit
 
 final class FeedRefreshViewController: NSObject, FeedLoadingView {
     lazy var view = loadView()
-    var presenter: FeedRefreshPresenter?
+    var loadFeed: (() -> Void)?
         
     private func loadView() -> UIRefreshControl {
         let view = UIRefreshControl()
@@ -26,6 +26,6 @@ final class FeedRefreshViewController: NSObject, FeedLoadingView {
     }
     
     @objc func refresh() {
-        presenter?.load()
+        loadFeed?()
     }
 }
