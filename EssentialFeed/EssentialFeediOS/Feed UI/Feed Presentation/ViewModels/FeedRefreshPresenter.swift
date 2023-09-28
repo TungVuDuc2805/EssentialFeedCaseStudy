@@ -8,7 +8,7 @@
 import Foundation
 import EssentialFeed
 
-protocol FeedLoadingView: AnyObject {
+protocol FeedLoadingView {
     func display(_ isLoading: Bool)
 }
 
@@ -18,7 +18,7 @@ protocol FeedView {
 
 final class FeedRefreshPresenter {
     private let feedView: FeedView
-    private weak var loadingView: FeedLoadingView?
+    private let loadingView: FeedLoadingView
     private let loader: FeedLoader
     
     init(feedView: FeedView, loadingView: FeedLoadingView, loader: FeedLoader) {
@@ -31,7 +31,7 @@ final class FeedRefreshPresenter {
     var onLoadedFeed: (([FeedImage]) -> Void)?
 
     func load() {
-        loadingView?.display(true)
+        loadingView.display(true)
         loader.load { [weak self] result in
             switch result {
             case .success(let images):
@@ -39,7 +39,7 @@ final class FeedRefreshPresenter {
             case .failure:
                 break
             }
-            self?.loadingView?.display(false)
+            self?.loadingView.display(false)
         }
     }
 }
