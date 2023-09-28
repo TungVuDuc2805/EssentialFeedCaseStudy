@@ -27,27 +27,22 @@ protocol FeedView {
 final class FeedRefreshPresenter {
     private let feedView: FeedView
     private let loadingView: FeedLoadingView
-    private let loader: FeedLoader
     
-    init(feedView: FeedView, loadingView: FeedLoadingView, loader: FeedLoader) {
+    init(feedView: FeedView, loadingView: FeedLoadingView) {
         self.feedView = feedView
         self.loadingView = loadingView
-        self.loader = loader
     }
     
-    var onFeedLoadingState: ((Bool) -> Void)?
-    var onLoadedFeed: (([FeedImage]) -> Void)?
-
-    func load() {
+    func didStartLoadingFeed() {
         loadingView.display(FeedLoadingViewModel(isLoading: true))
-        loader.load { [weak self] result in
-            switch result {
-            case .success(let images):
-                self?.feedView.display(FeedViewModel(feed: images))
-            case .failure:
-                break
-            }
-            self?.loadingView.display(FeedLoadingViewModel(isLoading: false))
-        }
+    }
+    
+    func didEndLoadingFeed(with feed: [FeedImage]) {
+        loadingView.display(FeedLoadingViewModel(isLoading: false))
+        feedView.display(FeedViewModel(feed: feed))
+    }
+    
+    func didEndLoadingFeed(with error: Error) {
+        loadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 }
