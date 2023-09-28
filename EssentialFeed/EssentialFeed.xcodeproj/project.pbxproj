@@ -16,6 +16,7 @@
 		DF23806C2ABAF9CD00166912 /* XCTestCase+SharedHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF23806B2ABAF9CD00166912 /* XCTestCase+SharedHelpers.swift */; };
 		DF3B11262AC4342C0032C20B /* FeedRefreshViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3B11252AC4342C0032C20B /* FeedRefreshViewModel.swift */; };
 		DF3B11282AC439100032C20B /* FeedImageCellViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3B11272AC439100032C20B /* FeedImageCellViewModel.swift */; };
+		DF3B112B2AC52E290032C20B /* FeedRefreshPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3B112A2AC52E290032C20B /* FeedRefreshPresenter.swift */; };
 		DF3ED1F32ABB1F31000C9770 /* LocalFeedLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3ED1F22ABB1F31000C9770 /* LocalFeedLoader.swift */; };
 		DF3ED1F52ABB2601000C9770 /* FeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3ED1F42ABB2601000C9770 /* FeedStore.swift */; };
 		DF3ED1F72ABB2809000C9770 /* LocalFeedImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF3ED1F62ABB2809000C9770 /* LocalFeedImage.swift */; };
@@ -118,6 +119,7 @@
 		DF23806B2ABAF9CD00166912 /* XCTestCase+SharedHelpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+SharedHelpers.swift"; sourceTree = "<group>"; };
 		DF3B11252AC4342C0032C20B /* FeedRefreshViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedRefreshViewModel.swift; sourceTree = "<group>"; };
 		DF3B11272AC439100032C20B /* FeedImageCellViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedImageCellViewModel.swift; sourceTree = "<group>"; };
+		DF3B112A2AC52E290032C20B /* FeedRefreshPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedRefreshPresenter.swift; sourceTree = "<group>"; };
 		DF3ED1F22ABB1F31000C9770 /* LocalFeedLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFeedLoader.swift; sourceTree = "<group>"; };
 		DF3ED1F42ABB2601000C9770 /* FeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedStore.swift; sourceTree = "<group>"; };
 		DF3ED1F62ABB2809000C9770 /* LocalFeedImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalFeedImage.swift; sourceTree = "<group>"; };
@@ -301,6 +303,7 @@
 			children = (
 				DF3B11252AC4342C0032C20B /* FeedRefreshViewModel.swift */,
 				DF3B11272AC439100032C20B /* FeedImageCellViewModel.swift */,
+				DF3B112A2AC52E290032C20B /* FeedRefreshPresenter.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -713,6 +716,7 @@
 				DF05EF772AC414EE000128A8 /* FeedRefreshViewController.swift in Sources */,
 				DFBE3A812AC2C82600B31516 /* FeedViewController.swift in Sources */,
 				DF05EF722AC41253000128A8 /* ImageLoader.swift in Sources */,
+				DF3B112B2AC52E290032C20B /* FeedRefreshPresenter.swift in Sources */,
 				DF3B11262AC4342C0032C20B /* FeedRefreshViewModel.swift in Sources */,
 				DFBE3A832AC2CAB600B31516 /* FeedCell.swift in Sources */,
 				DF05EF792AC4171D000128A8 /* FeedImageCellController.swift in Sources */,
