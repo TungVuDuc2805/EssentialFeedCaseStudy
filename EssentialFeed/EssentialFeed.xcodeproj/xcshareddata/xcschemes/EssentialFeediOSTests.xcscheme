@@ -22,7 +22,7 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "DFBE3A502AC2BDF400B31516"
+               BlueprintIdentifier = "DFBE3A6A2AC2C7E000B31516"
                BuildableName = "EssentialFeediOSTests.xctest"
                BlueprintName = "EssentialFeediOSTests"
                ReferencedContainer = "container:EssentialFeed.xcodeproj">

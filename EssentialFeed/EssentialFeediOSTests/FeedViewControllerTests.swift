@@ -313,8 +313,8 @@ class FeedViewControllerTests: XCTestCase {
             loadedImages.append(url)
             imageLoadCompletions.append(completion)
             
-            return Task {
-                self.cancelLoadedImages.append(url  )
+            return Task { [weak self] in
+                self?.cancelLoadedImages.append(url)
             }
         }
         
