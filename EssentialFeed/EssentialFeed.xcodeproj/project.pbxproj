@@ -221,7 +221,7 @@
 			isa = PBXGroup;
 			children = (
 				DF05EF7A2AC41A24000128A8 /* Composers */,
-				DF3B11242AC434240032C20B /* ViewModels */,
+				DF3B11292AC52D480032C20B /* Feed Presentation */,
 				DF05EF742AC41277000128A8 /* Controllers */,
 				DF05EF752AC4127D000128A8 /* Views */,
 			);
@@ -305,6 +305,15 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		DF3B11292AC52D480032C20B /* Feed Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				DF05EF702AC41247000128A8 /* Feed Image Loader */,
+				DF3B11242AC434240032C20B /* ViewModels */,
+			);
+			path = "Feed Presentation";
+			sourceTree = "<group>";
+		};
 		DF3ED1F12ABB1F28000C9770 /* Feed Cache */ = {
 			isa = PBXGroup;
 			children = (
@@ -374,7 +383,6 @@
 			isa = PBXGroup;
 			children = (
 				DF05EF732AC4126E000128A8 /* Feed UI */,
-				DF05EF702AC41247000128A8 /* Feed Image Loader */,
 			);
 			path = EssentialFeediOS;
 			sourceTree = "<group>";
