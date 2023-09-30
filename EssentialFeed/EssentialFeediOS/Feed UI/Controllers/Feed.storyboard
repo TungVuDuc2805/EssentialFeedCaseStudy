@@ -134,6 +134,12 @@ Location</string>
                             <outlet property="prefetchDataSource" destination="xxu-YY-hZc" id="W7k-vE-4IE"/>
                         </connections>
                     </tableView>
+                    <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="5AN-rg-un0">
+                        <autoresizingMask key="autoresizingMask"/>
+                        <connections>
+                            <action selector="refresh" destination="xxu-YY-hZc" eventType="valueChanged" id="TEb-mp-FOq"/>
+                        </connections>
+                    </refreshControl>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="bcd-Ce-ygh" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <tapGestureRecognizer id="h5r-pa-2tu"/>

@@ -7,21 +7,31 @@
 
 import UIKit
 
-public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching {
-    var refreshController: FeedRefreshViewController?
+public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView {
     var feed = [FeedImageCellController]()
-    
+    var loadFeed: (() -> Void)?
+
     private var onViewIsAppearing: ((FeedViewController) -> Void)?
 
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-        refreshControl = refreshController?.view
-        
+                
         onViewIsAppearing = { [weak self] vc in
             vc.onViewIsAppearing = nil
-            self?.refreshController?.refresh()
+            self?.refresh()
         }
+    }
+    
+    func display(_ model: FeedLoadingViewModel) {
+        if model.isLoading {
+            refreshControl?.beginRefreshing()
+        } else {
+            refreshControl?.endRefreshing()
+        }
+    }
+    
+    @IBAction func refresh() {
+        loadFeed?()
     }
     
     public override func viewIsAppearing(_ animated: Bool) {
