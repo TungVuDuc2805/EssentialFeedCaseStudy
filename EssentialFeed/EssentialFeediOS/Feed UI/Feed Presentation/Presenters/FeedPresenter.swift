@@ -1,5 +1,5 @@
 //
-//  FeedRefreshPresenter.swift
+//  FeedPresenter.swift
 //  EssentialFeediOS
 //
 //  Created by Tung Vu Duc on 28/09/2023.
@@ -24,7 +24,7 @@ protocol FeedView {
     func display(_ model: FeedViewModel)
 }
 
-final class FeedRefreshPresenter {
+final class FeedPresenter {
     private let feedView: FeedView
     private let loadingView: FeedLoadingView
     
