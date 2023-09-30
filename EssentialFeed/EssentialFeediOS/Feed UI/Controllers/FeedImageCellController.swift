@@ -13,26 +13,28 @@ protocol FeedImageCellControllerDelegate {
 }
 
 final class FeedImageCellController: FeedImageView {
-    private lazy var cell = FeedCell()
+    private var cell: FeedCell?
     private let delegate: FeedImageCellControllerDelegate
     
     init(delegate: FeedImageCellControllerDelegate) {
         self.delegate = delegate
     }
 
-    func view() -> FeedCell {
+    func view(in tableView: UITableView) -> FeedCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "FeedImageCell") as! FeedCell
+        self.cell = cell
         loadImage()
         return cell
     }
     
     func display(_ model: FeedImageViewModel<UIImage>) {
-        cell.descriptionLabel.text = model.descriptionText
-        cell.locationLabel.text = model.locationText
-        cell.locationContainer.isHidden = model.isLocationHidden
-        cell.feedImageView.image = model.imageData
-        cell.retryButton.isHidden = model.isRetryButtonHidden
-        cell.contentContainer.isShimmering = model.isLoading
-        cell.retry = delegate.didRequestImage
+        cell?.descriptionLabel.text = model.descriptionText
+        cell?.locationLabel.text = model.locationText
+        cell?.locationContainer.isHidden = model.isLocationHidden
+        cell?.feedImageView.image = model.imageData
+        cell?.retryButton.isHidden = model.isRetryButtonHidden
+        cell?.contentContainer.isShimmering = model.isLoading
+        cell?.retry = delegate.didRequestImage
     }
     
     func loadImage() {

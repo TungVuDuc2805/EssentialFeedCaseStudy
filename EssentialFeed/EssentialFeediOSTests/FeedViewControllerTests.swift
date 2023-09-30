@@ -16,7 +16,7 @@ class FeedViewControllerTests: XCTestCase {
         
         XCTAssertEqual(loader.loadFeedCallCount, 0)
 
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         XCTAssertEqual(loader.loadFeedCallCount, 1)
         
         sut.simulatePullToRefresh()
@@ -29,7 +29,7 @@ class FeedViewControllerTests: XCTestCase {
     func test_loadingIndicator_hidesOnLoadingCompletion() {
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         XCTAssertEqual(sut.isFeedRefreshing, true)
         loader.completeFeedLoading()
         XCTAssertEqual(sut.isFeedRefreshing, false)
@@ -53,7 +53,7 @@ class FeedViewControllerTests: XCTestCase {
 
         let (sut, loader) = makeSUT()
 
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         XCTAssertEqual(sut.numberOfRenderedFeedImageViews(), 0)
         
         loader.completeFeedLoading(with: [image0], at: 0)
@@ -67,7 +67,7 @@ class FeedViewControllerTests: XCTestCase {
     func test_loadFeedCompletion_doesNotAlterCurrentRenderingStateOnError() {
         let image0 = makeImage()
         let (sut, loader) = makeSUT()
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         
         loader.completeFeedLoading(with: [image0], at: 0)
         
@@ -81,7 +81,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
         XCTAssertEqual(loader.loadedImages, [])
         
@@ -97,7 +97,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
         XCTAssertEqual(loader.cancelLoadedImages, [])
         
@@ -113,7 +113,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
 
         let view0 = sut.simulateCellVisible(at: 0)
@@ -134,7 +134,7 @@ class FeedViewControllerTests: XCTestCase {
     func test_feedImageView_rendersImageLoadedFromURL() {
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [makeImage(), makeImage()], at: 0)
 
         let view0 = sut.simulateCellVisible(at: 0)
@@ -157,7 +157,7 @@ class FeedViewControllerTests: XCTestCase {
     func test_feedImageViewRetryButton_isVisibleOnImageURLLoadError() {
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [makeImage(), makeImage()], at: 0)
 
         let view0 = sut.simulateCellVisible(at: 0)
@@ -178,7 +178,7 @@ class FeedViewControllerTests: XCTestCase {
     func test_feedImageViewRetryButton_isVisibleOnInvalidImageData() {
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [makeImage()], at: 0)
 
         let view0 = sut.simulateCellVisible(at: 0)
@@ -195,7 +195,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
 
         let view0 = sut.simulateCellVisible(at: 0)
@@ -218,7 +218,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
         XCTAssertEqual(loader.loadedImages, [])
 
@@ -234,7 +234,7 @@ class FeedViewControllerTests: XCTestCase {
         let image1 = makeImage(url: URL(string: "https://url-1.com")!)
         let (sut, loader) = makeSUT()
         
-        sut.loadViewIfNeeded()
+        sut.simulateAppearance()
         loader.completeFeedLoading(with: [image0, image1], at: 0)
         XCTAssertEqual(loader.cancelLoadedImages, [])
 
@@ -330,6 +330,52 @@ class FeedViewControllerTests: XCTestCase {
 }
 
 extension FeedViewController {
+    
+    func simulateAppearance() {
+        if !isViewLoaded {
+            loadViewIfNeeded()
+            prepareForFirstAppearance()
+        }
+        
+        beginAppearanceTransition(true, animated: false)
+        endAppearanceTransition()
+    }
+    
+    private func prepareForFirstAppearance() {
+        setSmallFrameToPreventRenderingCells()
+        replaceRefreshControlWithSpyForiOS17Support()
+    }
+    
+    private func setSmallFrameToPreventRenderingCells() {
+        tableView.frame = CGRect(x: 0, y: 0, width: 390, height: 1)
+    }
+    
+    private func replaceRefreshControlWithSpyForiOS17Support() {
+        let spyRefreshControl = UIRefreshControlSpy()
+        
+        refreshControl?.allTargets.forEach { target in
+            refreshControl?.actions(forTarget: target, forControlEvent: .valueChanged)?.forEach { action in
+                spyRefreshControl.addTarget(target, action: Selector(action), for: .valueChanged)
+            }
+        }
+        
+        refreshControl = spyRefreshControl
+    }
+    
+    private class UIRefreshControlSpy: UIRefreshControl {
+        private var _isRefreshing = false
+        
+        override var isRefreshing: Bool { _isRefreshing }
+        
+        override func beginRefreshing() {
+            _isRefreshing = true
+        }
+        
+        override func endRefreshing() {
+            _isRefreshing = false
+        }
+    }
+    
     func simulatePullToRefresh() {
         refreshControl?.simulatePull()
     }
