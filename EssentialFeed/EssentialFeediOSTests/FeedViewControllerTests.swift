@@ -245,6 +245,20 @@ class FeedViewControllerTests: XCTestCase {
         XCTAssertEqual(loader.cancelLoadedImages, [image0.url, image1.url])
     }
     
+    func test_feedImageCell_doesNotRenderLoadedImageOnCellNoVisible() {
+        let (sut, loader) = makeSUT()
+        sut.simulateAppearance()
+        
+        loader.completeFeedLoading(with: [makeImage()], at: 0)
+
+        let view0 = sut.simulateCellNotVisible(at: 0)
+        
+        let imageData0 = UIImage.makeImage(of: .red).pngData()!
+        loader.completeImageLoading(imageData0, at: 0)
+        
+        XCTAssertNil(view0?.renderedImage)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedViewController, loader: LoaderSpy) {
         let loader = LoaderSpy()
