@@ -23,10 +23,20 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
     }
     
     func display(_ model: FeedLoadingViewModel) {
-        if model.isLoading {
-            refreshControl?.beginRefreshing()
+        if Thread.isMainThread {
+            if model.isLoading {
+                refreshControl?.beginRefreshing()
+            } else {
+                refreshControl?.endRefreshing()
+            }
         } else {
-            refreshControl?.endRefreshing()
+            DispatchQueue.main.async { [weak self] in
+                if model.isLoading {
+                    self?.refreshControl?.beginRefreshing()
+                } else {
+                    self?.refreshControl?.endRefreshing()
+                }
+            }
         }
     }
     
