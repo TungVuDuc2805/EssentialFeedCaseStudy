@@ -13,6 +13,7 @@ class RemoteImageDataLoader {
     
     enum Error: Swift.Error {
         case clientError
+        case invalidData
     }
     
     init(client: HTTPClient) {
@@ -20,8 +21,13 @@ class RemoteImageDataLoader {
     }
     
     func loadImageData(from url: URL, completion: @escaping (Error) -> Void) {
-        client.get(from: url) { _ in
-            completion(.clientError)
+        client.get(from: url) { result in
+            switch result {
+            case .success:
+                completion(.invalidData)
+            case .failure:
+                completion(.clientError)
+            }
         }
     }
 
@@ -67,6 +73,18 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         XCTAssertEqual(capturedError, .clientError)
     }
     
+    func test_loadImageData_deliversErrorOnNon200HTTPClientError() {
+        let (sut, client) = makeSUT()
+
+        let samples = [199, 201, 300, 400, 500]
+        samples.enumerated().forEach { index, code in
+            assert(sut, toCompleteWithError: .invalidData) {
+                let data = Data("image data".utf8)
+                client.completeWith(data: data, statusCode: code, at: index)
+            }
+        }
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: RemoteImageDataLoader, client: HTTPClientSpy) {
         let client = HTTPClientSpy()
@@ -74,6 +92,17 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         trackForMemoryLeaks(client, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, client)
+    }
+    
+    private func assert(_ sut: RemoteImageDataLoader, toCompleteWithError error: RemoteImageDataLoader.Error, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
+        var capturedErrors = [RemoteImageDataLoader.Error]()
+        sut.loadImageData(from: anyURL()) { error in
+            capturedErrors.append(error)
+        }
+        
+        action()
+        
+        XCTAssertEqual(capturedErrors, [error], file: file, line: line)
     }
     
     private class HTTPClientSpy: HTTPClient {
