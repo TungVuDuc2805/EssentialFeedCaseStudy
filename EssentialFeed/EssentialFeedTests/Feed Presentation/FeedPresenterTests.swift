@@ -51,34 +51,40 @@ class FeedPresenter {
 class FeedPresenterTests: XCTestCase {
     
     func test_didStartLoadingFeed_sendMessageToView() {
-        let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
+        let (sut, viewSpy) = makeSUT()
         
         sut.didStartLoadingFeed()
         
-        XCTAssertEqual(loadingView.messages, [.loading(true)])
+        XCTAssertEqual(viewSpy.messages, [.loading(true)])
     }
     
     func test_didEndLoadingFeedWithError_sendMessageToView() {
-        let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
+        let (sut, viewSpy) = makeSUT()
         
         sut.didEndLoadingFeed(with: anyNSError())
         
-        XCTAssertEqual(loadingView.messages, [.loading(false)])
+        XCTAssertEqual(viewSpy.messages, [.loading(false)])
     }
     
     func test_didEndLoadingFeedWithFeed_sendMessageToView() {
-        let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
+        let (sut, viewSpy) = makeSUT()
         let feed = anyUniqueItems().models
         
         sut.didEndLoadingFeed(with: feed)
         
-        XCTAssertEqual(loadingView.messages, [.loading(false), .feed(feed)])
+        XCTAssertEqual(viewSpy.messages, [.loading(false), .feed(feed)])
     }
     
     // MARK: - Helpers
+    private func makeSUT(file: StaticString = #file, line: UInt = #line) -> (sut: FeedPresenter, view: FeedLoadingViewSpy) {
+        let loadingView = FeedLoadingViewSpy()
+        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
+        trackForMemoryLeaks(sut, file: file, line: line)
+        trackForMemoryLeaks(loadingView, file: file, line: line)
+            
+        return (sut, loadingView)
+    }
+    
     private class FeedLoadingViewSpy: FeedLoadingView, FeedView {
         enum Message: Equatable {
             case loading(Bool)
