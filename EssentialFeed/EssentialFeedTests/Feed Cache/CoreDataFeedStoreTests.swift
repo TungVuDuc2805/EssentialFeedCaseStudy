@@ -10,14 +10,14 @@ import EssentialFeed
 
 class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     func test_retrieve_deliversEmptyOnEmptyCache() {
-        let sut = CoreDataFeedStore()
+        let sut = makeSUT()
         
         expectRetrieveDeliversEmptyOnEmptyCache(on: sut)
     }
     
     func test_retrieveTwice_deliversEmptyTwiceOnEmptyCache() {
-        let sut = CoreDataFeedStore()
-        
+        let sut = makeSUT()
+
         expectRetrieveDeliversEmptyOnEmptyCache(on: sut)
     }
     
@@ -59,6 +59,14 @@ class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     
     func test_storeSideEffects_runSerially() {
         
+    }
+    
+    // MARK: - Helpers
+    private func makeSUT() -> CoreDataFeedStore {
+        let storeURL = URL(fileURLWithPath: "/dev/null")
+        let sut = try! CoreDataFeedStore(storeURL: storeURL)
+        trackForMemoryLeaks(sut)
+        return sut
     }
     
 }
