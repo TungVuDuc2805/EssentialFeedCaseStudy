@@ -20,13 +20,13 @@ class RemoteImageDataLoader {
         self.client = client
     }
     
-    func loadImageData(from url: URL, completion: @escaping (Error) -> Void) {
+    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
         client.get(from: url) { result in
             switch result {
             case .success:
-                completion(.invalidData)
+                completion(.failure(Error.invalidData))
             case .failure:
-                completion(.clientError)
+                completion(.failure(Error.clientError))
             }
         }
     }
@@ -62,15 +62,10 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_loadImageData_deliversErrorOnClientError() {
         let (sut, client) = makeSUT()
-        
-        var capturedError: RemoteImageDataLoader.Error?
-        sut.loadImageData(from: anyURL()) {
-            capturedError = $0
+
+        assert(sut, toCompleteWithError: .clientError) {
+            client.completeWithError()
         }
-        
-        client.completeWithError()
-        
-        XCTAssertEqual(capturedError, .clientError)
     }
     
     func test_loadImageData_deliversErrorOnNon200HTTPClientError() {
@@ -79,7 +74,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let samples = [199, 201, 300, 400, 500]
         samples.enumerated().forEach { index, code in
             assert(sut, toCompleteWithError: .invalidData) {
-                let data = Data("image data".utf8)
+                let data = Data("any image data".utf8)
                 client.completeWith(data: data, statusCode: code, at: index)
             }
         }
@@ -96,8 +91,13 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     private func assert(_ sut: RemoteImageDataLoader, toCompleteWithError error: RemoteImageDataLoader.Error, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
         var capturedErrors = [RemoteImageDataLoader.Error]()
-        sut.loadImageData(from: anyURL()) { error in
-            capturedErrors.append(error)
+        sut.loadImageData(from: anyURL()) { result in
+            switch result {
+            case .success:
+                break
+            case .failure(let error):
+                capturedErrors.append(error)
+            }
         }
         
         action()
