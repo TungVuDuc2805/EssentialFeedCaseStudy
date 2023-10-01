@@ -9,10 +9,6 @@ import XCTest
 import EssentialFeed
 
 extension XCTestCase {
-    func anyNSError() -> NSError {
-        NSError(domain: "test", code: 0)
-    }
-    
     func uniqueFeedImage(
         id: UUID = UUID(),
         description: String? = "any description",

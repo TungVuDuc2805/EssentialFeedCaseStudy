@@ -10,13 +10,18 @@ import EssentialFeed
 
 class RemoteImageDataLoader {
     private let client: HTTPClient
+    
+    enum Error: Swift.Error {
+        case clientError
+    }
+    
     init(client: HTTPClient) {
         self.client = client
     }
     
-    func loadImageData(from url: URL) {
+    func loadImageData(from url: URL, completion: @escaping (Error) -> Void) {
         client.get(from: url) { _ in
-            
+            completion(.clientError)
         }
     }
 
@@ -34,7 +39,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSUT()
         let url = URL(string: "https://any-url.com")!
         
-        sut.loadImageData(from: url)
+        sut.loadImageData(from: url) { _ in }
         
         XCTAssertEqual(client.requestedURLs, [url])
     }
@@ -43,10 +48,24 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSUT()
         let url = URL(string: "https://any-url.com")!
         
-        sut.loadImageData(from: url)
-        sut.loadImageData(from: url)
+        sut.loadImageData(from: url) { _ in }
+        sut.loadImageData(from: url) { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url, url])
+    }
+    
+    func test_loadImageData_deliversErrorOnClientError() {
+        let (sut, client) = makeSUT()
+        let url = URL(string: "https://any-url.com")!
+        
+        var capturedError: RemoteImageDataLoader.Error?
+        sut.loadImageData(from: url) {
+            capturedError = $0
+        }
+        
+        client.completeWithError()
+        
+        XCTAssertEqual(capturedError, .clientError)
     }
     
     // MARK: - Helpers
