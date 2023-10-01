@@ -20,13 +20,18 @@ class RemoteImageDataLoader {
 class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_init_doesNotLoadImage() {
-        let client = HTTPClientSpy()
-        let _ = RemoteImageDataLoader(client: client)
+        let (_, client) = makeSUT()
         
         XCTAssertEqual(client.requestedURLs, [])
     }
     
     // MARK: - Helpers
+    private func makeSUT() -> (sut: RemoteImageDataLoader, client: HTTPClientSpy) {
+        let client = HTTPClientSpy()
+        let sut = RemoteImageDataLoader(client: client)
+
+        return (sut, client)
+    }
     
     private class HTTPClientSpy: HTTPClient {
         var messages = [(url: URL, completion: (HTTPClientResult) -> Void)]()
