@@ -76,10 +76,6 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         return (sut, client)
     }
     
-    private func anyURL() -> URL {
-        URL(string: "https://any-url.com")!
-    }
-    
     private class HTTPClientSpy: HTTPClient {
         var messages = [(url: URL, completion: (HTTPClientResult) -> Void)]()
         var requestedURLs: [URL] {
