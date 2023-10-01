@@ -16,9 +16,20 @@ protocol FeedLoadingView {
     func display(_ model: FeedLoadingViewModel)
 }
 
+struct FeedViewModel {
+    let feed: [FeedImage]
+}
+
+protocol FeedView {
+    func display(_ model: FeedViewModel)
+}
+
 class FeedPresenter {
+    private let feedView: FeedView
     private let loadingView: FeedLoadingView
-    init(loadingView: FeedLoadingView) {
+    
+    init(feedView: FeedView, loadingView: FeedLoadingView) {
+        self.feedView = feedView
         self.loadingView = loadingView
     }
     
@@ -32,6 +43,7 @@ class FeedPresenter {
     
     func didEndLoadingFeed(with feed: [FeedImage]) {
         loadingView.display(FeedLoadingViewModel(isLoading: false))
+        feedView.display(FeedViewModel(feed: feed))
     }
 
 }
@@ -40,7 +52,7 @@ class FeedPresenterTests: XCTestCase {
     
     func test_didStartLoadingFeed_sendMessageToView() {
         let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(loadingView: loadingView)
+        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
         
         sut.didStartLoadingFeed()
         
@@ -49,7 +61,7 @@ class FeedPresenterTests: XCTestCase {
     
     func test_didEndLoadingFeedWithError_sendMessageToView() {
         let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(loadingView: loadingView)
+        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
         
         sut.didEndLoadingFeed(with: anyNSError())
         
@@ -58,22 +70,28 @@ class FeedPresenterTests: XCTestCase {
     
     func test_didEndLoadingFeedWithFeed_sendMessageToView() {
         let loadingView = FeedLoadingViewSpy()
-        let sut = FeedPresenter(loadingView: loadingView)
+        let sut = FeedPresenter(feedView: loadingView, loadingView: loadingView)
+        let feed = anyUniqueItems().models
         
-        sut.didEndLoadingFeed(with: [])
+        sut.didEndLoadingFeed(with: feed)
         
-        XCTAssertEqual(loadingView.messages, [.loading(false)])
+        XCTAssertEqual(loadingView.messages, [.loading(false), .feed(feed)])
     }
     
     // MARK: - Helpers
-    private class FeedLoadingViewSpy: FeedLoadingView {
+    private class FeedLoadingViewSpy: FeedLoadingView, FeedView {
         enum Message: Equatable {
             case loading(Bool)
+            case feed([FeedImage])
         }
         var messages = [Message]()
         
         func display(_ model: FeedLoadingViewModel) {
             messages.append(.loading(model.isLoading))
+        }
+        
+        func display(_ model: FeedViewModel) {
+            messages.append(.feed(model.feed))
         }
     }
     
