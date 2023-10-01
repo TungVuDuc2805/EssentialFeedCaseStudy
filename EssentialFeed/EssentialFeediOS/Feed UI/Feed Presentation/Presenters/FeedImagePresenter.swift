@@ -8,21 +8,6 @@
 import Foundation
 import EssentialFeed
 
-struct FeedImageViewModel<Image> {
-    let descriptionText: String?
-    let locationText: String?
-    let isLoading: Bool
-    let imageData: Image?
-    
-    var isLocationHidden: Bool {
-        locationText == nil
-    }
-    
-    var isRetryButtonHidden: Bool {
-        imageData != nil || isLoading
-    }
-}
-
 protocol FeedImageView {
     associatedtype Image
     func display(_ model: FeedImageViewModel<Image>)
