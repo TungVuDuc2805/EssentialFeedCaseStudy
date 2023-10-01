@@ -22,7 +22,9 @@ class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     }
     
     func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues() {
-        
+        let sut = makeSUT()
+
+        expectRetrieveDeliversInsertedValuesToEmptyCache(on: sut)
     }
     
     func test_retrieveTwiceAfterInsertingToEmptyCache_deliversInsertedValuesTwice() {

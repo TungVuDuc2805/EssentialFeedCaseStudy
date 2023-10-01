@@ -31,11 +31,11 @@ class CodableFeedStoreTests: XCTestCase, CodableFeedStoreSpecs {
     }
     
     func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues() {
-        expectRetrieveDeliversInsertedValuesOnNonEmptyCache(on: makeSUT())
+        expectRetrieveDeliversInsertedValuesToEmptyCache(on: makeSUT())
     }
     
     func test_retrieveTwiceAfterInsertingToEmptyCache_deliversInsertedValuesTwice() {
-        expectRetrieveDeliversInsertedTwiceValuesOnNonEmptyCache(on: makeSUT())
+        expectRetrieveDeliversInsertedTwiceValuesToEmptyCache(on: makeSUT())
     }
     
     func test_retrieve_deliversFailureOnRetrievalError() {

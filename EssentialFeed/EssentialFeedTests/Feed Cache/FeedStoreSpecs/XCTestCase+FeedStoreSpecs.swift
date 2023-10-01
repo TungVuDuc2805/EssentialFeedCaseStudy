@@ -17,7 +17,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
         expectRetrieveTwice(from: sut, completeWith: .empty, file: file, line: line)
     }
     
-    func expectRetrieveDeliversInsertedValuesOnNonEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+    func expectRetrieveDeliversInsertedValuesToEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let timestamp = Date()
         let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
         
@@ -26,7 +26,7 @@ extension FeedStoreSpecs where Self: XCTestCase {
         expectRetrieve(from: sut, completeWith: .success(timestamp: timestamp, locals: locals), file: file, line: line)
     }
     
-    func expectRetrieveDeliversInsertedTwiceValuesOnNonEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
+    func expectRetrieveDeliversInsertedTwiceValuesToEmptyCache(on sut: FeedStore, file: StaticString = #filePath, line: UInt = #line) {
         let timestamp = Date()
         let (_, locals) = uniqueItems([uniqueFeedImage(), uniqueFeedImage()])
         
