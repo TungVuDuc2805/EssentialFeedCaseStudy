@@ -37,7 +37,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_loadImageData_requestsLoadFromURL() {
         let (sut, client) = makeSUT()
-        let url = URL(string: "https://any-url.com")!
+        let url = anyURL()
         
         sut.loadImageData(from: url) { _ in }
         
@@ -46,7 +46,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_loadImageDataTwice_requestsLoadFromURLTwice() {
         let (sut, client) = makeSUT()
-        let url = URL(string: "https://any-url.com")!
+        let url = anyURL()
         
         sut.loadImageData(from: url) { _ in }
         sut.loadImageData(from: url) { _ in }
@@ -56,10 +56,9 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_loadImageData_deliversErrorOnClientError() {
         let (sut, client) = makeSUT()
-        let url = URL(string: "https://any-url.com")!
         
         var capturedError: RemoteImageDataLoader.Error?
-        sut.loadImageData(from: url) {
+        sut.loadImageData(from: anyURL()) {
             capturedError = $0
         }
         
@@ -75,6 +74,10 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         trackForMemoryLeaks(client, file: file, line: line)
         trackForMemoryLeaks(sut, file: file, line: line)
         return (sut, client)
+    }
+    
+    private func anyURL() -> URL {
+        URL(string: "https://any-url.com")!
     }
     
     private class HTTPClientSpy: HTTPClient {
