@@ -16,7 +16,9 @@ class CoreDataFeedStoreTests: XCTestCase, FeedStoreSpecs {
     }
     
     func test_retrieveTwice_deliversEmptyTwiceOnEmptyCache() {
+        let sut = CoreDataFeedStore()
         
+        expectRetrieveDeliversEmptyOnEmptyCache(on: sut)
     }
     
     func test_retrieveAfterInsertingToEmptyCache_deliversInsertedValues() {
