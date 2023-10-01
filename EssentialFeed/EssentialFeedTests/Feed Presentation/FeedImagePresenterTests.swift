@@ -43,6 +43,15 @@ class FeedImagePresenter<Image, View: FeedImageView> {
             imageData: nil)
         )
     }
+    
+    func didEndLoadingImage(with error: Error, model: FeedImage) {
+        view.display(FeedImageViewModel(
+            descriptionText: model.description,
+            locationText: model.location,
+            isLoading: false,
+            imageData: nil)
+        )
+    }
 
 }
 
@@ -56,6 +65,16 @@ class FeedImagePresenterTets: XCTestCase {
         sut.didStartLoadingImage(model)
         
         XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: true, imageData: nil))
+    }
+    
+    func test_didEndLoadingImageWithError_sendPresentableModelWithoutImageToView() {
+        let viewSpy = ViewSpy()
+        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy)
+        let model = uniqueFeedImage()
+        
+        sut.didEndLoadingImage(with: anyNSError(), model: model)
+        
+        XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: nil))
     }
     
     // MARK : - Helpers
