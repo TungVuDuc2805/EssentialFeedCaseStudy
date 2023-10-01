@@ -20,18 +20,38 @@ class RemoteImageDataLoader {
         self.client = client
     }
     
-    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
-        client.get(from: url) { result in
+    private class Task: Cancellable {
+        var completion: ((Result<Data, Swift.Error>) -> Void)?
+        
+        init(completion: @escaping (Result<Data, Swift.Error>) -> Void) {
+            self.completion = completion
+        }
+        
+        func cancel() {
+            completion = nil
+        }
+        
+        func handle(_ result: Result<(Data, HTTPURLResponse), Swift.Error>) {
             switch result {
             case .success(let (data, response)):
                 guard response.statusCode == 200 else {
-                    return completion(.failure(Error.invalidData))
+                    completion?(.failure(Error.invalidData))
+                    return
                 }
-                completion(.success(data))
+                completion?(.success(data))
             case .failure:
-                completion(.failure(Error.clientError))
+                completion?(.failure(Error.clientError))
             }
         }
+    }
+    
+    func loadImageData(from url: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void) -> Cancellable {
+        let task = Task(completion: completion)
+        client.get(from: url) { result in
+            task.handle(result)
+        }
+        
+        return task
     }
 
 }
@@ -48,7 +68,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSUT()
         let url = anyURL()
         
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
         
         XCTAssertEqual(client.requestedURLs, [url])
     }
@@ -57,8 +77,8 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let (sut, client) = makeSUT()
         let url = anyURL()
         
-        sut.loadImageData(from: url) { _ in }
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
 
         XCTAssertEqual(client.requestedURLs, [url, url])
     }
@@ -88,7 +108,7 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         let data = Data("any image data".utf8)
 
         var capturedImageData: Data?
-        sut.loadImageData(from: anyURL()) { result in
+        _ =  sut.loadImageData(from: anyURL()) { result in
             if let data = try? result.get() {
                 capturedImageData = data
             }
@@ -97,6 +117,21 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         client.completeWith(data: data, statusCode: 200)
         
         XCTAssertEqual(capturedImageData, data)
+    }
+    
+    func test_cancelLoadImageData_doesNotDeliversResult() {
+        let (sut, client) = makeSUT()
+        let data = Data("any image data".utf8)
+
+        var capturedResult: Result<Data,Error>?
+        let task = sut.loadImageData(from: anyURL()) { result in
+            capturedResult = result
+        }
+        
+        task.cancel()
+        client.completeWith(data: data, statusCode: 200)
+        
+        XCTAssertNil(capturedResult)
     }
     
     // MARK: - Helpers
@@ -110,12 +145,12 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     private func assert(_ sut: RemoteImageDataLoader, toCompleteWithError error: RemoteImageDataLoader.Error, when action: () -> Void, file: StaticString = #file, line: UInt = #line) {
         var capturedErrors = [RemoteImageDataLoader.Error]()
-        sut.loadImageData(from: anyURL()) { result in
+        _ = sut.loadImageData(from: anyURL()) { result in
             switch result {
-            case .success:
-                break
-            case .failure(let error):
+            case .failure(let error as RemoteImageDataLoader.Error):
                 capturedErrors.append(error)
+            default:
+                break
             }
         }
         
