@@ -23,8 +23,11 @@ class RemoteImageDataLoader {
     func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
         client.get(from: url) { result in
             switch result {
-            case .success:
-                completion(.failure(Error.invalidData))
+            case .success(let (data, response)):
+                guard response.statusCode == 200 else {
+                    return completion(.failure(Error.invalidData))
+                }
+                completion(.success(data))
             case .failure:
                 completion(.failure(Error.clientError))
             }
@@ -78,6 +81,22 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
                 client.completeWith(data: data, statusCode: code, at: index)
             }
         }
+    }
+    
+    func test_loadImageData_deliversLoadedImageDataOn200HTTPResponse() {
+        let (sut, client) = makeSUT()
+        let data = Data("any image data".utf8)
+
+        var capturedImageData: Data?
+        sut.loadImageData(from: anyURL()) { result in
+            if let data = try? result.get() {
+                capturedImageData = data
+            }
+        }
+        
+        client.completeWith(data: data, statusCode: 200)
+        
+        XCTAssertEqual(capturedImageData, data)
     }
     
     // MARK: - Helpers
