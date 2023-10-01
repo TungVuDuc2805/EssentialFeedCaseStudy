@@ -28,7 +28,7 @@ protocol FeedImageView {
     func display(_ model: FeedImageViewModel<Image>)
 }
 
-class FeedImagePresenter<Image, View: FeedImageView> {
+class FeedImagePresenter<Image, View: FeedImageView> where View.Image == Image {
     private let view: View
     private let transformer: (Data) -> Image?
 
@@ -61,6 +61,7 @@ class FeedImagePresenter<Image, View: FeedImageView> {
         guard let image = transformer(imageData) else {
             return didEndLoadingImage(with: InvalidImageDataError(), model: model)
         }
+        view.display(FeedImageViewModel(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: image))
     }
 }
 
@@ -94,6 +95,16 @@ class FeedImagePresenterTets: XCTestCase {
         sut.didEndLoadingImage(with: data, model: model)
         
         XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: nil))
+    }
+    
+    func test_didEndLoadingImageWithImageData_sendPresentableModelWithoutImageToView() {
+        let viewSpy = ViewSpy()
+        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy, imageTransformer: { data in return String(data: data, encoding: .utf8) })
+        let model = uniqueFeedImage()
+        let data = Data("any image data".utf8)
+        sut.didEndLoadingImage(with: data, model: model)
+        
+        XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: "any image data"))
     }
     
     // MARK : - Helpers
