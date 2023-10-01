@@ -30,11 +30,15 @@ protocol FeedImageView {
 
 class FeedImagePresenter<Image, View: FeedImageView> {
     private let view: View
-    
-    init(view: View) {
+    private let transformer: (Data) -> Image?
+
+    init(view: View, imageTransformer: @escaping (Data) -> Image?) {
         self.view = view
+        self.transformer = imageTransformer
     }
-    
+
+    private struct InvalidImageDataError: Error {}
+
     func didStartLoadingImage(_ model: FeedImage) {
         view.display(FeedImageViewModel(
             descriptionText: model.description,
@@ -53,13 +57,18 @@ class FeedImagePresenter<Image, View: FeedImageView> {
         )
     }
 
+    func didEndLoadingImage(with imageData: Data, model: FeedImage) {
+        guard let image = transformer(imageData) else {
+            return didEndLoadingImage(with: InvalidImageDataError(), model: model)
+        }
+    }
 }
 
 class FeedImagePresenterTets: XCTestCase {
     
     func test_didStartLoadingImage_sendPresentableModelWithoutImageToView() {
         let viewSpy = ViewSpy()
-        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy)
+        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy, imageTransformer: { data in return String(data: data, encoding: .utf8)})
         let model = uniqueFeedImage()
         
         sut.didStartLoadingImage(model)
@@ -69,10 +78,20 @@ class FeedImagePresenterTets: XCTestCase {
     
     func test_didEndLoadingImageWithError_sendPresentableModelWithoutImageToView() {
         let viewSpy = ViewSpy()
-        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy)
+        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy, imageTransformer: { data in return String(data: data, encoding: .utf8)})
         let model = uniqueFeedImage()
         
         sut.didEndLoadingImage(with: anyNSError(), model: model)
+        
+        XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: nil))
+    }
+    
+    func test_didEndLoadingImageWithInvalidData_sendPresentableModelWithoutImageToView() {
+        let viewSpy = ViewSpy()
+        let sut = FeedImagePresenter<String, ViewSpy>(view: viewSpy, imageTransformer: { _ in return nil })
+        let model = uniqueFeedImage()
+        let data = Data("invalid data".utf8)
+        sut.didEndLoadingImage(with: data, model: model)
         
         XCTAssertEqual(viewSpy.messages[0], .init(descriptionText: model.description, locationText: model.location, isLoading: false, imageData: nil))
     }
