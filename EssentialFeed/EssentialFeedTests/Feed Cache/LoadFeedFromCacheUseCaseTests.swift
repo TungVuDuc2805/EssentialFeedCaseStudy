@@ -137,7 +137,7 @@ class LoadFeedFromCacheUseCaseTests: XCTestCase {
         let store = FeedStoreSpy()
         var sut: LocalFeedLoader? = LocalFeedLoader(store: store, currentDate: Date.init)
         
-        var capturedResult: LoadFeedResult?
+        var capturedResult: FeedLoader.LoadFeedResult?
         sut?.load {
             capturedResult = $0
         }
