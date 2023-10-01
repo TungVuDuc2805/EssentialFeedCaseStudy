@@ -6,17 +6,16 @@
 //
 
 import Foundation
-import EssentialFeed
 
-protocol FeedLoadingView {
+public protocol FeedLoadingView {
     func display(_ model: FeedLoadingViewModel)
 }
 
-protocol FeedView {
+public protocol FeedView {
     func display(_ model: FeedViewModel)
 }
 
-final class FeedPresenter {
+public final class FeedPresenter {
     private let feedView: FeedView
     private let loadingView: FeedLoadingView
     
@@ -24,21 +23,21 @@ final class FeedPresenter {
         return "My Feed"
     }
     
-    init(feedView: FeedView, loadingView: FeedLoadingView) {
+    public init(feedView: FeedView, loadingView: FeedLoadingView) {
         self.feedView = feedView
         self.loadingView = loadingView
     }
     
-    func didStartLoadingFeed() {
+    public func didStartLoadingFeed() {
         loadingView.display(FeedLoadingViewModel(isLoading: true))
     }
     
-    func didEndLoadingFeed(with feed: [FeedImage]) {
+    public func didEndLoadingFeed(with feed: [FeedImage]) {
         loadingView.display(FeedLoadingViewModel(isLoading: false))
         feedView.display(FeedViewModel(feed: feed))
     }
     
-    func didEndLoadingFeed(with error: Error) {
+    public func didEndLoadingFeed(with error: Error) {
         loadingView.display(FeedLoadingViewModel(isLoading: false))
     }
 }
