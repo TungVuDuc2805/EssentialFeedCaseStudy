@@ -47,7 +47,8 @@ class RemoteImageDataLoader {
     
     func loadImageData(from url: URL, completion: @escaping (Result<Data, Swift.Error>) -> Void) -> Cancellable {
         let task = Task(completion: completion)
-        client.get(from: url) { result in
+        client.get(from: url) { [weak self] result in
+            guard self != nil else { return }
             task.handle(result)
         }
         
@@ -121,7 +122,6 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
     
     func test_cancelLoadImageData_doesNotDeliversResult() {
         let (sut, client) = makeSUT()
-        let data = Data("any image data".utf8)
 
         var capturedResult: Result<Data,Error>?
         let task = sut.loadImageData(from: anyURL()) { result in
@@ -129,8 +129,23 @@ class LoadImageDataFromRemoteUseCaseTests: XCTestCase {
         }
         
         task.cancel()
-        client.completeWith(data: data, statusCode: 200)
+        client.completeWithError()
         
+        XCTAssertNil(capturedResult)
+    }
+    
+    func test_loadImageData_doesNotDeliversResultAfterSUTInstanceHasBeenDeallocated() {
+        let client = HTTPClientSpy()
+        var sut: RemoteImageDataLoader? = RemoteImageDataLoader(client: client)
+
+        var capturedResult: Result<Data,Error>?
+        _ = sut?.loadImageData(from: anyURL()) { result in
+            capturedResult = result
+        }
+        
+        sut = nil
+        client.completeWithError()
+
         XCTAssertNil(capturedResult)
     }
     
