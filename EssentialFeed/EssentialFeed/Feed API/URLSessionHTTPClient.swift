@@ -21,7 +21,7 @@ public class URLSessionHTTPClient: HTTPClient {
     public func get(from url: URL, completion: @escaping (HTTPClientResult) -> Void) {
         session.dataTask(with: url) { data, response, error in
             if let res = response as? HTTPURLResponse, res.statusCode == 200, let data = data {
-                completion(.success(data, res))
+                completion(.success((data, res)))
             } else if let error = error {
                 completion(.failure(error))
             } else {
