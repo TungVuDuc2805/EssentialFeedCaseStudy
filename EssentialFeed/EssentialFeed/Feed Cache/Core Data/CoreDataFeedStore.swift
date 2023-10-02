@@ -54,7 +54,7 @@ public final class CoreDataFeedStore: FeedStore {
         }
     }
     
-    public func retrieve(completion: @escaping RetrievalCompletion) {
+    public func retrieve(completion: @escaping FeedStore.RetrievalCompletion) {
         performAsync { context in
             do {
                 let result = try ManagedFeed.find(in: context)
@@ -80,4 +80,22 @@ public final class CoreDataFeedStore: FeedStore {
         }
     }
     
+}
+
+extension CoreDataFeedStore: ImageDataStore {
+    public enum ImageDataStoreError: Swift.Error {
+        case notFound
+    }
+    
+    public func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
+        
+    }
+    
+    public func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {
+        
+    }
+    
+    public func retrieve(from url: URL, completion: @escaping ImageDataStore.RetrievalCompletion) {
+        completion(.failure(ImageDataStoreError.notFound))
+    }
 }
