@@ -24,6 +24,9 @@ public final class LocalImageDataLoader {
         self.store = store
     }
     
+}
+ 
+extension LocalImageDataLoader {
     public func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
         store.deleteImageData(with: url) { [weak self] deletionError in
             guard let self = self else { return }
@@ -36,6 +39,10 @@ public final class LocalImageDataLoader {
             }
         }
     }
+    
+}
+
+extension LocalImageDataLoader: ImageLoader {
     
     private class Task: Cancellable {
         var completion: ((Result<Data, Swift.Error>) -> Void)?
@@ -58,7 +65,7 @@ public final class LocalImageDataLoader {
         }
     }
     
-    public func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+    public func loadImageData(from url: URL, completion: @escaping ImageLoader.Result) -> Cancellable {
         let task = Task(completion: completion)
         store.retrieve(from: url) { result in
             task.handle(result)

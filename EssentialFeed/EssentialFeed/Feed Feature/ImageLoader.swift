@@ -12,5 +12,6 @@ public protocol Cancellable {
 }
 
 public protocol ImageLoader {
-    func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable
+    typealias Result = (Swift.Result<Data, Error>) -> Void
+    func loadImageData(from url: URL, completion: @escaping Result) -> Cancellable
 }
