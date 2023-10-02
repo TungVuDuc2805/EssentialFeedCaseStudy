@@ -44,6 +44,25 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         XCTAssertEqual(capturedError as NSError?, retrievalError)
     }
     
+    func test_loadImageFromURL_deliversDataOnRetrievalSuccessfully() {
+        let (sut, storeSpy) = makeSUT()
+        let imageData = anyData()
+        
+        var capturedData: Data?
+        sut.loadImageData(from: anyURL()) { result in
+            switch result {
+            case .success(let data):
+                capturedData = data
+            default:
+                break
+            }
+        }
+        
+        storeSpy.completeRetrievalSuccessfully(with: imageData)
+        
+        XCTAssertEqual(capturedData, imageData)
+    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStoreSpy) {
         let storeSpy = ImageDataStoreSpy()
@@ -53,5 +72,9 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         trackForMemoryLeaks(storeSpy, file: file, line: line)
         
         return (sut, storeSpy)
+    }
+    
+    private func anyData() -> Data {
+        return Data("any data".utf8)
     }
 }

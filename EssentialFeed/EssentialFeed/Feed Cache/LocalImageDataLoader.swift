@@ -10,7 +10,7 @@ import Foundation
 public protocol ImageDataStore {
     typealias DeletionCompletion = (Error?) -> Void
     typealias InsertionCompletion = (Error?) -> Void
-    typealias RetrievalCompletion = (Error?) -> Void
+    typealias RetrievalCompletion = (Result<Data, Error>) -> Void
 
     func deleteImageData(with url: URL, completion: @escaping DeletionCompletion)
     func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion)
@@ -38,10 +38,6 @@ public final class LocalImageDataLoader {
     }
     
     public func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
-        store.retrieve(from: url) { error in
-            if let error = error {
-                completion(.failure(error))
-            }
-        }
+        store.retrieve(from: url, completion: completion) 
     }
 }

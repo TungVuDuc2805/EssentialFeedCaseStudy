@@ -18,7 +18,7 @@ class ImageDataStoreSpy: ImageDataStore {
     
     var deletionCompletions = [DeletionCompletion]()
     var insertionCompletions = [InsertionCompletion]()
-    var deletionompletions = [InsertionCompletion]()
+    var retrievalCompletions = [RetrievalCompletion]()
 
     func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
         messages.append(.deletion(url))
@@ -48,10 +48,14 @@ class ImageDataStoreSpy: ImageDataStore {
     
     func retrieve(from url: URL, completion: @escaping RetrievalCompletion) {
         messages.append(.retrieval(url))
-        deletionompletions.append(completion)
+        retrievalCompletions.append(completion)
     }
     
     func completeRetrievalWith(_ error: Error, at index: Int = 0) {
-        deletionompletions[index](error)
+        retrievalCompletions[index](.failure(error))
+    }
+    
+    func completeRetrievalSuccessfully(with data: Data, at index: Int = 0) {
+        retrievalCompletions[index](.success(data))
     }
 }
