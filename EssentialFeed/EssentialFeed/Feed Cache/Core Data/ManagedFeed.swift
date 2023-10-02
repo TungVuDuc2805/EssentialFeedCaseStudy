@@ -14,3 +14,34 @@ public class ManagedFeed: NSManagedObject {
     @NSManaged public var timestamp: Date
     @NSManaged public var cache: NSOrderedSet
 }
+
+extension ManagedFeed {
+    static func insert(_ timestamp: Date, _ locals: [LocalFeedImage], to context: NSManagedObjectContext) {
+        let cache = ManagedFeed(context: context)
+        cache.timestamp = timestamp
+        cache.cache = NSOrderedSet(array: locals.map {
+            let cacheItem = ManagedImage(context: context)
+            cacheItem.id = $0.id
+            cacheItem.imageDescription = $0.description
+            cacheItem.location = $0.location
+            cacheItem.url = $0.url
+            
+            return cacheItem
+        })
+    }
+    
+    static func find(in context: NSManagedObjectContext) throws -> ManagedFeed? {
+        let request = NSFetchRequest<ManagedFeed>(entityName: ManagedFeed.className())
+        request.returnsObjectsAsFaults = false
+        let result = try context.fetch(request)
+        guard let cache = result.first else {
+            return nil
+        }
+        
+        return cache
+    }
+    
+    var feed: [ManagedImage] {
+        cache.compactMap { $0 as? ManagedImage }
+    }
+}
