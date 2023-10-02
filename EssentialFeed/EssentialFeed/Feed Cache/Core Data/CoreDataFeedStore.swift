@@ -30,10 +30,9 @@ public final class CoreDataFeedStore: FeedStore {
     }
     
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
-        let managedContext = managedContext
-        managedContext.perform {
+        performAsync { context in
             do {
-                try ManagedFeed.find(in: managedContext).map(managedContext.delete)
+                try ManagedFeed.find(in: context).map(context.delete)
                 completion(nil)
             } catch {
                 completion(error)
@@ -42,13 +41,12 @@ public final class CoreDataFeedStore: FeedStore {
     }
     
     public func insert(_ items: [LocalFeedImage], _ timestamp: Date, completion: @escaping InsertionCompletion) {
-        let managedContext = managedContext
-        managedContext.perform {
+        performAsync { context in
             do {
-                let cache = try ManagedFeed.uniqueInstance(in: managedContext)
-                cache.insert(timestamp, items, to: managedContext)
+                let cache = try ManagedFeed.uniqueInstance(in: context)
+                cache.insert(timestamp, items, to: context)
 
-                try managedContext.save()
+                try context.save()
                 completion(nil)
             } catch {
                 completion(error)
@@ -57,10 +55,9 @@ public final class CoreDataFeedStore: FeedStore {
     }
     
     public func retrieve(completion: @escaping RetrievalCompletion) {
-        let managedContext = managedContext
-        managedContext.perform {
+        performAsync { context in
             do {
-                let result = try ManagedFeed.find(in: managedContext)
+                let result = try ManagedFeed.find(in: context)
                 guard let cache = result else {
                     return completion(.empty)
                 }
@@ -72,7 +69,14 @@ public final class CoreDataFeedStore: FeedStore {
                 completion(.failure(error))
             }
             
-            try? managedContext.save()
+            try? context.save()
+        }
+    }
+    
+    private func performAsync(_ action: @escaping (NSManagedObjectContext) -> Void) {
+        let managedContext = managedContext
+        managedContext.perform {
+            action(managedContext)
         }
     }
     
