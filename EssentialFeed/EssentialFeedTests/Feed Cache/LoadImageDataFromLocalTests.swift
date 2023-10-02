@@ -78,10 +78,13 @@ class LoadImageDataFromLocalTests: XCTestCase {
     }
     
     // MARK: - Helpers
-    private func makeSUT() -> (sut: LocalImageDataLoader, storeSpy: ImageDataStore) {
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStore) {
         let storeSpy = ImageDataStore()
         let sut = LocalImageDataLoader(store: storeSpy)
-
+        
+        trackForMemoryLeaks(sut, file: file, line: line)
+        trackForMemoryLeaks(storeSpy, file: file, line: line)
+        
         return (sut, storeSpy)
     }
     
