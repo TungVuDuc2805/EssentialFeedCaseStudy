@@ -16,14 +16,14 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         XCTAssertTrue(storeSpy.messages.isEmpty)
     }
     
-//    func test_loadImageFromURL_requestsStoreRetrieval() {
-//        let (sut, storeSpy) = makeSUT()
-//        let url = anyURL()
-//        
-//        sut.loadImageData(from: url)
-//        
-//        XCTAssertTrue(storeSpy.messages, [.retrieval(url)])
-//    }
+    func test_loadImageFromURL_requestsStoreRetrieval() {
+        let (sut, storeSpy) = makeSUT()
+        let url = anyURL()
+        
+        sut.loadImageData(from: url)
+        
+        XCTAssertEqual(storeSpy.messages, [.retrieval(url)])
+    }
     
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStoreSpy) {

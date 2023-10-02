@@ -12,6 +12,7 @@ class ImageDataStoreSpy: ImageDataStore {
     enum Message: Equatable {
         case deletion(URL)
         case insertion(Data, URL)
+        case retrieval(URL)
     }
     var messages = [Message]()
     
@@ -42,5 +43,9 @@ class ImageDataStoreSpy: ImageDataStore {
     
     func completeInsertionSuccessfully(at index: Int = 0) {
         insertionCompletions[index](nil)
+    }
+    
+    func retrieve(from url: URL) {
+        messages.append(.retrieval(url))
     }
 }

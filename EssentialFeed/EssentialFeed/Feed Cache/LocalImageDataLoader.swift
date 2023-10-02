@@ -13,6 +13,7 @@ public protocol ImageDataStore {
 
     func deleteImageData(with url: URL, completion: @escaping DeletionCompletion)
     func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion)
+    func retrieve(from url: URL)
 }
 
 public final class LocalImageDataLoader {
@@ -33,5 +34,9 @@ public final class LocalImageDataLoader {
                 completion(insertionError)
             }
         }
+    }
+    
+    public func loadImageData(from url: URL) {
+        store.retrieve(from: url)
     }
 }
