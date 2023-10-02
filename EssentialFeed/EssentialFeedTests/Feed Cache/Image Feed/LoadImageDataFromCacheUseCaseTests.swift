@@ -88,8 +88,4 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         
         return (sut, storeSpy)
     }
-    
-    private func anyData() -> Data {
-        return Data("any data".utf8)
-    }
 }
