@@ -20,9 +20,28 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         let (sut, storeSpy) = makeSUT()
         let url = anyURL()
         
-        sut.loadImageData(from: url)
+        sut.loadImageData(from: url) { _ in }
         
         XCTAssertEqual(storeSpy.messages, [.retrieval(url)])
+    }
+    
+    func test_loadImageFromURL_deliversErrorOnRetrievalError() {
+        let (sut, storeSpy) = makeSUT()
+        let retrievalError = anyNSError()
+        
+        var capturedError: Error?
+        sut.loadImageData(from: anyURL()) { result in
+            switch result {
+            case .failure(let error):
+                capturedError = error
+            default:
+                break
+            }
+        }
+        
+        storeSpy.completeRetrievalWith(retrievalError)
+        
+        XCTAssertEqual(capturedError as NSError?, retrievalError)
     }
     
     // MARK: - Helpers
