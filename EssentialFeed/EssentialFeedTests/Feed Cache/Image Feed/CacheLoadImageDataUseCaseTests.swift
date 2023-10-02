@@ -7,40 +7,12 @@
 
 import XCTest
 
-class ImageDataStore {
-    enum Message: Equatable {
-        case deletion(URL)
-        case insertion(Data, URL)
-    }
-    var messages = [Message]()
-    var deletionCompletions = [(Error?) -> Void]()
-    var insertionCompletions = [(Error?) -> Void]()
+protocol ImageDataStore {
+    typealias DeletionCompletion = (Error?) -> Void
+    typealias InsertionCompletion = (Error?) -> Void
 
-    func deleteImageData(with url: URL, completion: @escaping (Error?) -> Void) {
-        messages.append(.deletion(url))
-        deletionCompletions.append(completion)
-    }
-    
-    func completeDeletionWith(_ error: Error, at index: Int = 0) {
-        deletionCompletions[index](error)
-    }
-    
-    func completeDeletionSuccessfully(at index: Int = 0) {
-        deletionCompletions[index](nil)
-    }
-    
-    func insert(_ image: Data, with url: URL, completion: @escaping (Error?) -> Void) {
-        messages.append(.insertion(image, url))
-        insertionCompletions.append(completion)
-    }
-    
-    func completeInsertion(with error: Error, at index: Int = 0) {
-        insertionCompletions[index](error)
-    }
-    
-    func completeInsertionSuccessfully(at index: Int = 0) {
-        insertionCompletions[index](nil)
-    }
+    func deleteImageData(with url: URL, completion: @escaping DeletionCompletion)
+    func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion)
 }
 
 class LocalImageDataLoader {
@@ -147,7 +119,7 @@ class CacheLoadImageDataUseCaseTests: XCTestCase {
     }
     
     func test_save_doesNotDeliverValuesAfterSUTInstanceHasBeenDeallocatedAfterDeletionError() {
-        let storeSpy = ImageDataStore()
+        let storeSpy = ImageDataStoreSpy()
         var sut: LocalImageDataLoader? = LocalImageDataLoader(store: storeSpy)
 
         var capturedError: Error?
@@ -162,7 +134,7 @@ class CacheLoadImageDataUseCaseTests: XCTestCase {
     }
     
     func test_save_doesNotDeliverValuesAfterSUTInstanceHasBeenDeallocatedAfterInsertionError() {
-        let storeSpy = ImageDataStore()
+        let storeSpy = ImageDataStoreSpy()
         var sut: LocalImageDataLoader? = LocalImageDataLoader(store: storeSpy)
 
         var capturedError: Error?
@@ -178,8 +150,8 @@ class CacheLoadImageDataUseCaseTests: XCTestCase {
     }
     
     // MARK: - Helpers
-    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStore) {
-        let storeSpy = ImageDataStore()
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStoreSpy) {
+        let storeSpy = ImageDataStoreSpy()
         let sut = LocalImageDataLoader(store: storeSpy)
         
         trackForMemoryLeaks(sut, file: file, line: line)
@@ -190,6 +162,43 @@ class CacheLoadImageDataUseCaseTests: XCTestCase {
     
     private func anyData() -> Data {
         return Data("any data".utf8)
+    }
+    
+    private class ImageDataStoreSpy: ImageDataStore {
+        enum Message: Equatable {
+            case deletion(URL)
+            case insertion(Data, URL)
+        }
+        var messages = [Message]()
+        
+        var deletionCompletions = [DeletionCompletion]()
+        var insertionCompletions = [InsertionCompletion]()
+        
+        func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
+            messages.append(.deletion(url))
+            deletionCompletions.append(completion)
+        }
+        
+        func completeDeletionWith(_ error: Error, at index: Int = 0) {
+            deletionCompletions[index](error)
+        }
+        
+        func completeDeletionSuccessfully(at index: Int = 0) {
+            deletionCompletions[index](nil)
+        }
+        
+        func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {
+            messages.append(.insertion(image, url))
+            insertionCompletions.append(completion)
+        }
+        
+        func completeInsertion(with error: Error, at index: Int = 0) {
+            insertionCompletions[index](error)
+        }
+        
+        func completeInsertionSuccessfully(at index: Int = 0) {
+            insertionCompletions[index](nil)
+        }
     }
     
 }
