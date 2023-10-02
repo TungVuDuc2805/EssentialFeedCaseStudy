@@ -16,6 +16,15 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         XCTAssertTrue(storeSpy.messages.isEmpty)
     }
     
+//    func test_loadImageFromURL_requestsStoreRetrieval() {
+//        let (sut, storeSpy) = makeSUT()
+//        let url = anyURL()
+//        
+//        sut.loadImageData(from: url)
+//        
+//        XCTAssertTrue(storeSpy.messages, [.retrieval(url)])
+//    }
+    
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> (sut: LocalImageDataLoader, storeSpy: ImageDataStoreSpy) {
         let storeSpy = ImageDataStoreSpy()
@@ -25,42 +34,5 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         trackForMemoryLeaks(storeSpy, file: file, line: line)
         
         return (sut, storeSpy)
-    }
-    
-    private class ImageDataStoreSpy: ImageDataStore {
-        enum Message: Equatable {
-            case deletion(URL)
-            case insertion(Data, URL)
-        }
-        var messages = [Message]()
-        
-        var deletionCompletions = [DeletionCompletion]()
-        var insertionCompletions = [InsertionCompletion]()
-        
-        func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
-            messages.append(.deletion(url))
-            deletionCompletions.append(completion)
-        }
-        
-        func completeDeletionWith(_ error: Error, at index: Int = 0) {
-            deletionCompletions[index](error)
-        }
-        
-        func completeDeletionSuccessfully(at index: Int = 0) {
-            deletionCompletions[index](nil)
-        }
-        
-        func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {
-            messages.append(.insertion(image, url))
-            insertionCompletions.append(completion)
-        }
-        
-        func completeInsertion(with error: Error, at index: Int = 0) {
-            insertionCompletions[index](error)
-        }
-        
-        func completeInsertionSuccessfully(at index: Int = 0) {
-            insertionCompletions[index](nil)
-        }
     }
 }
