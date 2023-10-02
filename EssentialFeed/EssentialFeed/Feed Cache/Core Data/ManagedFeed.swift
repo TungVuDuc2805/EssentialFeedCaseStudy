@@ -16,10 +16,15 @@ public class ManagedFeed: NSManagedObject {
 }
 
 extension ManagedFeed {
-    static func insert(_ timestamp: Date, _ locals: [LocalFeedImage], to context: NSManagedObjectContext) {
-        let cache = ManagedFeed(context: context)
-        cache.timestamp = timestamp
-        cache.cache = NSOrderedSet(array: locals.map {
+    static func uniqueInstance(in context: NSManagedObjectContext) throws -> ManagedFeed {
+        try ManagedFeed.find(in: context).map(context.delete)
+        
+        return ManagedFeed(context: context)
+    }
+    
+    func insert(_ timestamp: Date, _ locals: [LocalFeedImage], to context: NSManagedObjectContext) {
+        self.timestamp = timestamp
+        self.cache = NSOrderedSet(array: locals.map {
             let cacheItem = ManagedImage(context: context)
             cacheItem.id = $0.id
             cacheItem.imageDescription = $0.description
