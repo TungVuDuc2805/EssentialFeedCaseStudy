@@ -20,7 +20,7 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         let (sut, storeSpy) = makeSUT()
         let url = anyURL()
         
-        sut.loadImageData(from: url) { _ in }
+        _ = sut.loadImageData(from: url) { _ in }
         
         XCTAssertEqual(storeSpy.messages, [.retrieval(url)])
     }
@@ -30,7 +30,7 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         let retrievalError = anyNSError()
         
         var capturedError: Error?
-        sut.loadImageData(from: anyURL()) { result in
+        _ = sut.loadImageData(from: anyURL()) { result in
             switch result {
             case .failure(let error):
                 capturedError = error
@@ -49,7 +49,7 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         let imageData = anyData()
         
         var capturedData: Data?
-        sut.loadImageData(from: anyURL()) { result in
+        _ = sut.loadImageData(from: anyURL()) { result in
             switch result {
             case .success(let data):
                 capturedData = data
@@ -61,6 +61,21 @@ class LoadImageDataFromCacheUseCaseTests: XCTestCase {
         storeSpy.completeRetrievalSuccessfully(with: imageData)
         
         XCTAssertEqual(capturedData, imageData)
+    }
+    
+    func test_cancelLoadImageFromURL_doesNotDeliverResult() {
+        let (sut, storeSpy) = makeSUT()
+        let imageData = anyData()
+        
+        var capturedResult: Result<Data, Error>?
+        let task = sut.loadImageData(from: anyURL()) { result in
+            capturedResult = result
+        }
+        
+        task.cancel()
+        storeSpy.completeRetrievalSuccessfully(with: imageData)
+        
+        XCTAssertNil(capturedResult)
     }
     
     // MARK: - Helpers

@@ -37,7 +37,33 @@ public final class LocalImageDataLoader {
         }
     }
     
-    public func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
-        store.retrieve(from: url, completion: completion) 
+    private class Task: Cancellable {
+        var completion: ((Result<Data, Swift.Error>) -> Void)?
+        
+        init(completion: @escaping (Result<Data, Swift.Error>) -> Void) {
+            self.completion = completion
+        }
+        
+        func cancel() {
+            completion = nil
+        }
+        
+        func handle(_ result: Result<Data, Swift.Error>) {
+            switch result {
+            case .success(let data):
+                completion?(.success(data))
+            case .failure(let error):
+                completion?(.failure(error))
+            }
+        }
+    }
+    
+    public func loadImageData(from url: URL, completion: @escaping (Result<Data, Error>) -> Void) -> Cancellable {
+        let task = Task(completion: completion)
+        store.retrieve(from: url) { result in
+            task.handle(result)
+        }
+        
+        return task
     }
 }
