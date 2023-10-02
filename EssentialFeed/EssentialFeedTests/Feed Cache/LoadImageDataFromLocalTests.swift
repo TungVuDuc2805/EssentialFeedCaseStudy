@@ -14,7 +14,8 @@ class ImageDataStore {
     }
     var messages = [Message]()
     var deletionCompletions = [(Error?) -> Void]()
-    
+    var insertionCompletions = [(Error?) -> Void]()
+
     func deleteImageData(with url: URL, completion: @escaping (Error?) -> Void) {
         messages.append(.deletion(url))
         deletionCompletions.append(completion)
@@ -28,8 +29,13 @@ class ImageDataStore {
         deletionCompletions[index](nil)
     }
     
-    func insert(_ image: Data, with url: URL) {
+    func insert(_ image: Data, with url: URL, completion: @escaping (Error?) -> Void) {
         messages.append(.insertion(image, url))
+        insertionCompletions.append(completion)
+    }
+    
+    func completeInsertion(with error: Error, at index: Int = 0) {
+        insertionCompletions[index](error)
     }
 }
 
@@ -41,10 +47,10 @@ class LocalImageDataLoader {
     
     func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
         store.deleteImageData(with: url) { [unowned self] deletionError in
-            if deletionError != nil {
+            guard deletionError == nil else {
                 return completion(deletionError)
             }
-            store.insert(imageData, with: url)
+            store.insert(imageData, with: url, completion: completion)
         }
     }
 }
@@ -93,7 +99,6 @@ class LoadImageDataFromLocalTests: XCTestCase {
     
     func test_save_requestsStoreInsertionOnDeletionSuccessfully() {
         let (sut, storeSpy) = makeSUT()
-        let deletionError = anyNSError()
         let url = anyURL()
         let data = anyData()
         
@@ -102,6 +107,23 @@ class LoadImageDataFromLocalTests: XCTestCase {
         storeSpy.completeDeletionSuccessfully()
         
         XCTAssertEqual(storeSpy.messages, [.deletion(url), .insertion(data, url)])
+    }
+    
+    func test_save_deliversErrorOnInsertionError() {
+        let (sut, storeSpy) = makeSUT()
+        let insertionError = anyNSError()
+        let url = anyURL()
+        let data = anyData()
+        
+        var capturedError: Error?
+        sut.save(data, with: url) {
+            capturedError = $0
+        }
+        
+        storeSpy.completeDeletionSuccessfully()
+        storeSpy.completeInsertion(with: anyNSError())
+
+        XCTAssertEqual(capturedError as NSError?, insertionError)
     }
     
     // MARK: - Helpers
