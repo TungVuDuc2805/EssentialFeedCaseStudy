@@ -37,6 +37,10 @@ class ImageDataStore {
     func completeInsertion(with error: Error, at index: Int = 0) {
         insertionCompletions[index](error)
     }
+    
+    func completeInsertionSuccessfully(at index: Int = 0) {
+        insertionCompletions[index](nil)
+    }
 }
 
 class LocalImageDataLoader {
@@ -112,11 +116,9 @@ class LoadImageDataFromLocalTests: XCTestCase {
     func test_save_deliversErrorOnInsertionError() {
         let (sut, storeSpy) = makeSUT()
         let insertionError = anyNSError()
-        let url = anyURL()
-        let data = anyData()
         
         var capturedError: Error?
-        sut.save(data, with: url) {
+        sut.save(anyData(), with: anyURL()) {
             capturedError = $0
         }
         
@@ -124,6 +126,20 @@ class LoadImageDataFromLocalTests: XCTestCase {
         storeSpy.completeInsertion(with: anyNSError())
 
         XCTAssertEqual(capturedError as NSError?, insertionError)
+    }
+    
+    func test_save_deliversNoErrorOnInsertionSuccessfully() {
+        let (sut, storeSpy) = makeSUT()
+        
+        var capturedError: Error?
+        sut.save(anyData(), with: anyURL()) {
+            capturedError = $0
+        }
+
+        storeSpy.completeDeletionSuccessfully()
+        storeSpy.completeInsertionSuccessfully()
+
+        XCTAssertNil(capturedError)
     }
     
     // MARK: - Helpers
