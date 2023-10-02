@@ -1,5 +1,5 @@
 //
-//  LoadImageDataFromLocalTests.swift
+//  CacheLoadImageDataUseCaseTests.swift
 //  EssentialFeedTests
 //
 //  Created by Tung Vu Duc on 02/10/2023.
@@ -63,7 +63,7 @@ class LocalImageDataLoader {
     }
 }
 
-class LoadImageDataFromLocalTests: XCTestCase {
+class CacheLoadImageDataUseCaseTests: XCTestCase {
     
     func test_init_doesNotMessageStore() {
         let (_, storeSpy) = makeSUT()
