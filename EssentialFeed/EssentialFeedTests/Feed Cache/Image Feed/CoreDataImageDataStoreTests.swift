@@ -13,16 +13,8 @@ class CoreDataImageDataStoreTests: XCTestCase {
     func test_retrieve_deliversNotFoundOnEmptyCache() {
         let sut = makeSUT()
         
-        var capturedError: CoreDataFeedStore.ImageDataStoreError?
-        sut.retrieve(from: anyURL()) { result in
-            switch result {
-            case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
-                capturedError = error
-            default:
-                break
-            }
-        }
-        
+        let capturedError = retrieveError(from: sut, with: anyURL())
+
         XCTAssertEqual(capturedError, .notFound)
     }
     
@@ -34,15 +26,7 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
         sut.insert(imageData, with: url0) { _ in }
         
-        var capturedError: CoreDataFeedStore.ImageDataStoreError?
-        sut.retrieve(from: url1) { result in
-            switch result {
-            case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
-                capturedError = error
-            default:
-                break
-            }
-        }
+        let capturedError = retrieveError(from: sut, with: url1)
         
         XCTAssertEqual(capturedError, .notFound)
     }
@@ -53,6 +37,24 @@ class CoreDataImageDataStoreTests: XCTestCase {
         let sut = try! CoreDataFeedStore(storeURL: storeURL)
         trackForMemoryLeaks(sut)
         return sut
+    }
+    
+    private func retrieveError(from sut: CoreDataFeedStore, with url: URL) -> CoreDataFeedStore.ImageDataStoreError? {
+        let exp = expectation(description: "wait for completion")
+        
+        var capturedError: CoreDataFeedStore.ImageDataStoreError?
+        sut.retrieve(from: url) { result in
+            switch result {
+            case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
+                capturedError = error
+            default:
+                break
+            }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+        return capturedError
     }
     
 }
