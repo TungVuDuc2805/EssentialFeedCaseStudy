@@ -8,13 +8,24 @@
 import XCTest
 
 class ImageDataStore {
-    var messages = [Any]()
+    enum Message: Equatable {
+        case deletion(URL)
+    }
+    var messages = [Message]()
+    
+    func deleteImageData(with url: URL) {
+        messages.append(.deletion(url))
+    }
 }
 
 class LocalImageDataLoader {
     private let store: ImageDataStore
     init(store: ImageDataStore) {
         self.store = store
+    }
+    
+    func save(_ imageData: Data, with url: URL) {
+        store.deleteImageData(with: url)
     }
 }
 
@@ -25,6 +36,16 @@ class LoadImageDataFromLocalTests: XCTestCase {
         _ = LocalImageDataLoader(store: storeSpy)
         
         XCTAssertTrue(storeSpy.messages.isEmpty)
+    }
+    
+    func test_save_requestsStoreDeletion() {
+        let storeSpy = ImageDataStore()
+        let sut = LocalImageDataLoader(store: storeSpy)
+        let url = anyURL()
+        
+        sut.save(Data("any".utf8), with: url)
+        
+        XCTAssertEqual(storeSpy.messages, [.deletion(url)])
     }
     
 }
