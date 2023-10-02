@@ -6,34 +6,7 @@
 //
 
 import XCTest
-
-protocol ImageDataStore {
-    typealias DeletionCompletion = (Error?) -> Void
-    typealias InsertionCompletion = (Error?) -> Void
-
-    func deleteImageData(with url: URL, completion: @escaping DeletionCompletion)
-    func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion)
-}
-
-class LocalImageDataLoader {
-    private let store: ImageDataStore
-    init(store: ImageDataStore) {
-        self.store = store
-    }
-    
-    func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
-        store.deleteImageData(with: url) { [weak self] deletionError in
-            guard let self = self else { return }
-            guard deletionError == nil else {
-                return completion(deletionError)
-            }
-            store.insert(imageData, with: url) { [weak self] insertionError in
-                guard self != nil else { return }
-                completion(insertionError)
-            }
-        }
-    }
-}
+import EssentialFeed
 
 class CacheLoadImageDataUseCaseTests: XCTestCase {
     
