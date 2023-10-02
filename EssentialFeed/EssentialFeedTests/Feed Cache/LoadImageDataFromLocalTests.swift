@@ -38,28 +38,25 @@ class LocalImageDataLoader {
 class LoadImageDataFromLocalTests: XCTestCase {
     
     func test_init_doesNotMessageStore() {
-        let storeSpy = ImageDataStore()
-        _ = LocalImageDataLoader(store: storeSpy)
-        
+        let (_, storeSpy) = makeSUT()
+
         XCTAssertTrue(storeSpy.messages.isEmpty)
     }
     
     func test_save_requestsStoreDeletion() {
-        let storeSpy = ImageDataStore()
-        let sut = LocalImageDataLoader(store: storeSpy)
+        let (sut, storeSpy) = makeSUT()
         let url = anyURL()
         
-        sut.save(Data("any".utf8), with: url) { _ in }
+        sut.save(anyData(), with: url) { _ in }
         
         XCTAssertEqual(storeSpy.messages, [.deletion(url)])
     }
     
     func test_save_doesNotRequestsStoreInsertionOnDeletionError() {
-        let storeSpy = ImageDataStore()
-        let sut = LocalImageDataLoader(store: storeSpy)
+        let (sut, storeSpy) = makeSUT()
         let url = anyURL()
         
-        sut.save(Data("any".utf8), with: url) { _ in }
+        sut.save(anyData(), with: url) { _ in }
         
         storeSpy.completeDeletionWith(anyNSError())
         
@@ -67,18 +64,29 @@ class LoadImageDataFromLocalTests: XCTestCase {
     }
     
     func test_save_deliversErrorOnDeletionError() {
-        let storeSpy = ImageDataStore()
-        let sut = LocalImageDataLoader(store: storeSpy)
+        let (sut, storeSpy) = makeSUT()
         let deletionError = anyNSError()
         
         var capturedError: Error?
-        sut.save(Data("any".utf8), with: anyURL()) {
+        sut.save(anyData(), with: anyURL()) {
             capturedError = $0
         }
         
         storeSpy.completeDeletionWith(deletionError)
         
         XCTAssertEqual(capturedError as NSError?, deletionError)
+    }
+    
+    // MARK: - Helpers
+    private func makeSUT() -> (sut: LocalImageDataLoader, storeSpy: ImageDataStore) {
+        let storeSpy = ImageDataStore()
+        let sut = LocalImageDataLoader(store: storeSpy)
+
+        return (sut, storeSpy)
+    }
+    
+    private func anyData() -> Data {
+        return Data("any data".utf8)
     }
     
 }
