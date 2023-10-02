@@ -24,8 +24,8 @@ class CoreDataImageDataStoreTests: XCTestCase {
         let url1 = URL(string: "https://url-1.com")!
         let imageData = anyData()
         
-        sut.insert(imageData, with: url0) { _ in }
-        
+        insertError(to: sut, with: url0, data: imageData)
+
         let capturedError = retrieveError(from: sut, with: url1)
         
         XCTAssertEqual(capturedError, .notFound)
@@ -36,13 +36,57 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
         XCTAssertEqual(retrieveErrorTwice(from: sut, with: anyURL()), .notFound)
     }
+    
+    func test_retrieve_deliversCachedImageDataWithURL() {
+        let sut = makeSUT()
+        let url = URL(string: "https://url-0.com")!
+        let imageData = anyData()
+        let exp = expectation(description: "wait for completion")
+        
+        insertError(to: sut, with: url, data: imageData)
+        
+        var capturedData: Data?
+        sut.retrieve(from: url) { result in
+            switch result {
+            case .success(let data):
+                capturedData = data
+            default:
+                break
+            }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+        XCTAssertEqual(capturedData, imageData)
+    }
  
     // MARK: - Helpers
-    private func makeSUT() -> CoreDataFeedStore {
+    private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
         let storeURL = URL(fileURLWithPath: "/dev/null")
         let sut = try! CoreDataFeedStore(storeURL: storeURL)
-        trackForMemoryLeaks(sut)
+        trackForMemoryLeaks(sut, file: file, line: line)
         return sut
+    }
+    
+    @discardableResult
+    private func insertError(to sut: CoreDataFeedStore, with url: URL, data: Data, file: StaticString = #filePath, line: UInt = #line) -> Error? {
+        let exp = expectation(description: "wait for completion")
+        let items = [LocalFeedImage(id: UUID(), description: nil, location: nil, url: url)]
+        
+        var capturedError: Error?
+        sut.insert(items, Date()) { insertionError in
+            if let error = insertionError {
+                XCTFail("expected insert successfully but got \(error) instead", file: file, line: line)
+            }
+            
+            sut.insert(data, with: url) { error in
+                capturedError = error
+                exp.fulfill()
+            }
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+        return capturedError
     }
     
     private func retrieveError(from sut: CoreDataFeedStore, with url: URL) -> CoreDataFeedStore.ImageDataStoreError? {

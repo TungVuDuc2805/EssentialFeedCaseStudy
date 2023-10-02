@@ -92,10 +92,33 @@ extension CoreDataFeedStore: ImageDataStore {
     }
     
     public func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {
-        
+        performAsync { context in
+            do {
+                let cache = try ManagedImage.first(with: url, in: context)
+                cache?.data = image
+                
+                try context.save()
+                completion(nil)
+            } catch {
+                completion(error)
+            }
+        }
     }
     
     public func retrieve(from url: URL, completion: @escaping ImageDataStore.RetrievalCompletion) {
-        completion(.failure(ImageDataStoreError.notFound))
+        performAsync { context in
+            do {
+                let cache = try ManagedImage.first(with: url, in: context)
+                
+                guard let data = cache?.data else {
+                    return completion(.failure(ImageDataStoreError.notFound))
+                }
+                completion(.success(data))
+                
+                try context.save()
+            } catch {
+                completion(.failure(ImageDataStoreError.notFound))
+            }
+        }
     }
 }
