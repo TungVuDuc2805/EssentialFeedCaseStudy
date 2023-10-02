@@ -30,10 +30,8 @@ class LocalImageDataLoader {
         self.store = store
     }
     
-    func save(_ imageData: Data, with url: URL) {
-        store.deleteImageData(with: url) { _ in
-            
-        }
+    func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
+        store.deleteImageData(with: url, completion: completion)
     }
 }
 
@@ -51,7 +49,7 @@ class LoadImageDataFromLocalTests: XCTestCase {
         let sut = LocalImageDataLoader(store: storeSpy)
         let url = anyURL()
         
-        sut.save(Data("any".utf8), with: url)
+        sut.save(Data("any".utf8), with: url) { _ in }
         
         XCTAssertEqual(storeSpy.messages, [.deletion(url)])
     }
@@ -61,11 +59,26 @@ class LoadImageDataFromLocalTests: XCTestCase {
         let sut = LocalImageDataLoader(store: storeSpy)
         let url = anyURL()
         
-        sut.save(Data("any".utf8), with: url)
+        sut.save(Data("any".utf8), with: url) { _ in }
         
         storeSpy.completeDeletionWith(anyNSError())
         
         XCTAssertEqual(storeSpy.messages, [.deletion(url)])
+    }
+    
+    func test_save_deliversErrorOnDeletionError() {
+        let storeSpy = ImageDataStore()
+        let sut = LocalImageDataLoader(store: storeSpy)
+        let deletionError = anyNSError()
+        
+        var capturedError: Error?
+        sut.save(Data("any".utf8), with: anyURL()) {
+            capturedError = $0
+        }
+        
+        storeSpy.completeDeletionWith(deletionError)
+        
+        XCTAssertEqual(capturedError as NSError?, deletionError)
     }
     
 }
