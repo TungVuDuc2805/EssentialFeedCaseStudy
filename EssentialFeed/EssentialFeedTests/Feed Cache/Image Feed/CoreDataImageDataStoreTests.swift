@@ -25,6 +25,27 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
         XCTAssertEqual(capturedError, .notFound)
     }
+    
+    func test_retrieve_deliversNotFoundOnNotMatchURL() {
+        let sut = makeSUT()
+        let url0 = URL(string: "https://url-0.com")!
+        let url1 = URL(string: "https://url-1.com")!
+        let imageData = anyData()
+        
+        sut.insert(imageData, with: url0) { _ in }
+        
+        var capturedError: CoreDataFeedStore.ImageDataStoreError?
+        sut.retrieve(from: url1) { result in
+            switch result {
+            case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
+                capturedError = error
+            default:
+                break
+            }
+        }
+        
+        XCTAssertEqual(capturedError, .notFound)
+    }
  
     // MARK: - Helpers
     private func makeSUT() -> CoreDataFeedStore {
