@@ -9,8 +9,8 @@
 import Foundation
 import CoreData
 
-@objc(MangedFeed)
-public class MangedFeed: NSManagedObject {
+@objc(ManagedFeed)
+public class ManagedFeed: NSManagedObject {
     @NSManaged public var timestamp: Date
     @NSManaged public var cache: NSOrderedSet
 }
