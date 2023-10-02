@@ -30,6 +30,12 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
         XCTAssertEqual(capturedError, .notFound)
     }
+    
+    func test_retrieve_hasNoSideEffectsOnEmptyCache() {
+        let sut = makeSUT()
+        
+        XCTAssertEqual(retrieveErrorTwice(from: sut, with: anyURL()), .notFound)
+    }
  
     // MARK: - Helpers
     private func makeSUT() -> CoreDataFeedStore {
@@ -55,6 +61,11 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
         wait(for: [exp], timeout: 0.1)
         return capturedError
+    }
+    
+    private func retrieveErrorTwice(from sut: CoreDataFeedStore, with url: URL) -> CoreDataFeedStore.ImageDataStoreError? {
+        _ = retrieveError(from: sut, with: url)
+        return retrieveError(from: sut, with: url)
     }
     
 }
