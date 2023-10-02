@@ -50,7 +50,8 @@ class LocalImageDataLoader {
     }
     
     func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
-        store.deleteImageData(with: url) { [unowned self] deletionError in
+        store.deleteImageData(with: url) { [weak self] deletionError in
+            guard let self = self else { return }
             guard deletionError == nil else {
                 return completion(deletionError)
             }
@@ -138,6 +139,21 @@ class LoadImageDataFromLocalTests: XCTestCase {
 
         storeSpy.completeDeletionSuccessfully()
         storeSpy.completeInsertionSuccessfully()
+
+        XCTAssertNil(capturedError)
+    }
+    
+    func test_save_doesNotDeliverValuesAfterSUTInstanceHasBeenDeallocatedAfterDeletionError() {
+        let storeSpy = ImageDataStore()
+        var sut: LocalImageDataLoader? = LocalImageDataLoader(store: storeSpy)
+
+        var capturedError: Error?
+        sut?.save(anyData(), with: anyURL()) {
+            capturedError = $0
+        }
+
+        sut = nil
+        storeSpy.completeDeletionWith(anyNSError())
 
         XCTAssertNil(capturedError)
     }
