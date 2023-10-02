@@ -55,7 +55,10 @@ class LocalImageDataLoader {
             guard deletionError == nil else {
                 return completion(deletionError)
             }
-            store.insert(imageData, with: url, completion: completion)
+            store.insert(imageData, with: url) { [weak self] insertionError in
+                guard self != nil else { return }
+                completion(insertionError)
+            }
         }
     }
 }
@@ -154,6 +157,22 @@ class LoadImageDataFromLocalTests: XCTestCase {
 
         sut = nil
         storeSpy.completeDeletionWith(anyNSError())
+
+        XCTAssertNil(capturedError)
+    }
+    
+    func test_save_doesNotDeliverValuesAfterSUTInstanceHasBeenDeallocatedAfterInsertionError() {
+        let storeSpy = ImageDataStore()
+        var sut: LocalImageDataLoader? = LocalImageDataLoader(store: storeSpy)
+
+        var capturedError: Error?
+        sut?.save(anyData(), with: anyURL()) {
+            capturedError = $0
+        }
+
+        storeSpy.completeDeletionSuccessfully()
+        sut = nil
+        storeSpy.completeInsertion(with: anyNSError())
 
         XCTAssertNil(capturedError)
     }
