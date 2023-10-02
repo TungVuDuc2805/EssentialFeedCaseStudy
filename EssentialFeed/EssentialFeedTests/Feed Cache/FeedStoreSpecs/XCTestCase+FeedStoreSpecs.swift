@@ -109,14 +109,14 @@ extension FeedStoreSpecs where Self: XCTestCase {
             op2.fulfill()
         }
         
-        let op3 = expectation(description: "Operation 2")
+        let op3 = expectation(description: "Operation 3")
         sut.insert(anyUniqueItems().locals, Date()) { _ in
             completions.append(op3)
             op3.fulfill()
         }
         
         waitForExpectations(timeout: 5.0)
-        XCTAssertEqual(completions, [op1, op2, op3])
+        XCTAssertEqual(completions, [op1, op2, op3], file: file, line: line)
     }
     
     func expectRetrieve(from sut: FeedStore, completeWith expectedResult: RetrievalCachedFeedResult, file: StaticString = #filePath, line: UInt = #line) {
