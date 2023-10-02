@@ -10,6 +10,7 @@ import XCTest
 class ImageDataStore {
     enum Message: Equatable {
         case deletion(URL)
+        case insertion(Data, URL)
     }
     var messages = [Message]()
     var deletionCompletions = [(Error?) -> Void]()
@@ -22,6 +23,14 @@ class ImageDataStore {
     func completeDeletionWith(_ error: Error, at index: Int = 0) {
         deletionCompletions[index](error)
     }
+    
+    func completeDeletionSuccessfully(at index: Int = 0) {
+        deletionCompletions[index](nil)
+    }
+    
+    func insert(_ image: Data, with url: URL) {
+        messages.append(.insertion(image, url))
+    }
 }
 
 class LocalImageDataLoader {
@@ -31,7 +40,12 @@ class LocalImageDataLoader {
     }
     
     func save(_ imageData: Data, with url: URL, completion: @escaping (Error?) -> Void) {
-        store.deleteImageData(with: url, completion: completion)
+        store.deleteImageData(with: url) { [unowned self] deletionError in
+            if deletionError != nil {
+                return completion(deletionError)
+            }
+            store.insert(imageData, with: url)
+        }
     }
 }
 
@@ -75,6 +89,19 @@ class LoadImageDataFromLocalTests: XCTestCase {
         storeSpy.completeDeletionWith(deletionError)
         
         XCTAssertEqual(capturedError as NSError?, deletionError)
+    }
+    
+    func test_save_requestsStoreInsertionOnDeletionSuccessfully() {
+        let (sut, storeSpy) = makeSUT()
+        let deletionError = anyNSError()
+        let url = anyURL()
+        let data = anyData()
+        
+        sut.save(data, with: url) { _ in }
+        
+        storeSpy.completeDeletionSuccessfully()
+        
+        XCTAssertEqual(storeSpy.messages, [.deletion(url), .insertion(data, url)])
     }
     
     // MARK: - Helpers
