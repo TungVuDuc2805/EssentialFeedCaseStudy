@@ -88,7 +88,7 @@ extension CoreDataFeedStore: ImageDataStore {
     }
     
     public func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
-        
+        completion(nil)
     }
     
     public func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {
