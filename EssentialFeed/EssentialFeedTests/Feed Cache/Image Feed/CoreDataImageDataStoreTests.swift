@@ -67,6 +67,16 @@ class CoreDataImageDataStoreTests: XCTestCase {
         
        XCTAssertNil(insertError(to: sut, with: url, data: imageData))
     }
+    
+    func test_insert_hasNoSideEffectsEmptyCache() {
+        let sut = makeSUT()
+        let url = URL(string: "https://url-0.com")!
+        let imageData = anyData()
+        
+        insertError(to: sut, with: url, data: imageData)
+        
+        XCTAssertNil(insertError(to: sut, with: url, data: imageData))
+    }
  
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
