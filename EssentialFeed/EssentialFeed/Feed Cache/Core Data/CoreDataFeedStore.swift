@@ -8,7 +8,7 @@
 import Foundation
 import CoreData
 
-public final class CoreDataFeedStore: FeedStore {
+public final class CoreDataFeedStore {
     enum Error: Swift.Error {
         case invalidLoadManagedObject
     }
@@ -20,7 +20,7 @@ public final class CoreDataFeedStore: FeedStore {
         guard let model = NSManagedObjectModel.load(from: "FeedStore", in: Bundle(for: CoreDataFeedStore.self)) else {
             throw Error.invalidLoadManagedObject
         }
-            
+        
         do {
             persistentContainer = try NSPersistentContainer.load(from: "FeedStore", model: model, url: storeURL)
             managedContext = persistentContainer.newBackgroundContext()
@@ -28,6 +28,10 @@ public final class CoreDataFeedStore: FeedStore {
             throw error
         }
     }
+    
+}
+
+extension CoreDataFeedStore: FeedStore {
     
     public func deleteCachedFeed(completion: @escaping DeletionCompletion) {
         performAsync { context in
