@@ -61,6 +61,8 @@
 		DF7D6A182ACB3326003A35A5 /* ImageDataStoreSpy.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7D6A172ACB3326003A35A5 /* ImageDataStoreSpy.swift */; };
 		DF7D6A1A2ACB394E003A35A5 /* ImageDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7D6A192ACB394E003A35A5 /* ImageDataStore.swift */; };
 		DF7D6A202ACB3D0D003A35A5 /* CoreDataImageDataStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7D6A1F2ACB3D0D003A35A5 /* CoreDataImageDataStoreTests.swift */; };
+		DF7D6A232ACC70C1003A35A5 /* CoreDataFeedStore+FeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7D6A222ACC70C1003A35A5 /* CoreDataFeedStore+FeedStore.swift */; };
+		DF7D6A252ACC7109003A35A5 /* CoreDataFeedStore+ImageDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF7D6A242ACC7108003A35A5 /* CoreDataFeedStore+ImageDataStore.swift */; };
 		DFAAB3E12ABB2E72009866BF /* XCTestCase+Factories.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFAAB3E02ABB2E72009866BF /* XCTestCase+Factories.swift */; };
 		DFBE39DB2ABDD09100B31516 /* CodableFeedStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFBE39DA2ABDD09100B31516 /* CodableFeedStore.swift */; };
 		DFBE39DD2ABF09D200B31516 /* FeedStoreSpecs.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFBE39DC2ABF09D200B31516 /* FeedStoreSpecs.swift */; };
@@ -197,6 +199,8 @@
 		DF7D6A192ACB394E003A35A5 /* ImageDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDataStore.swift; sourceTree = "<group>"; };
 		DF7D6A1F2ACB3D0D003A35A5 /* CoreDataImageDataStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreDataImageDataStoreTests.swift; sourceTree = "<group>"; };
 		DF7D6A212ACB414C003A35A5 /* FeedStore 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "FeedStore 2.xcdatamodel"; sourceTree = "<group>"; };
+		DF7D6A222ACC70C1003A35A5 /* CoreDataFeedStore+FeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreDataFeedStore+FeedStore.swift"; sourceTree = "<group>"; };
+		DF7D6A242ACC7108003A35A5 /* CoreDataFeedStore+ImageDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CoreDataFeedStore+ImageDataStore.swift"; sourceTree = "<group>"; };
 		DFAAB3E02ABB2E72009866BF /* XCTestCase+Factories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCTestCase+Factories.swift"; sourceTree = "<group>"; };
 		DFBE39DA2ABDD09100B31516 /* CodableFeedStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableFeedStore.swift; sourceTree = "<group>"; };
 		DFBE39DC2ABF09D200B31516 /* FeedStoreSpecs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeedStoreSpecs.swift; sourceTree = "<group>"; };
@@ -448,6 +452,8 @@
 				DF7D69C42AC9CAAD003A35A5 /* ManagedFeed.swift */,
 				DF7D69C62AC9CAAD003A35A5 /* ManagedImage.swift */,
 				DF7D69BE2AC9C986003A35A5 /* CoreDataFeedStore.swift */,
+				DF7D6A222ACC70C1003A35A5 /* CoreDataFeedStore+FeedStore.swift */,
+				DF7D6A242ACC7108003A35A5 /* CoreDataFeedStore+ImageDataStore.swift */,
 			);
 			path = "Core Data";
 			sourceTree = "<group>";
@@ -888,6 +894,7 @@
 			files = (
 				DF7D69AC2AC913F2003A35A5 /* FeedPresenter.swift in Sources */,
 				DF6D2DF42ABAC74400A3250F /* FeedItemsMapper.swift in Sources */,
+				DF7D6A252ACC7109003A35A5 /* CoreDataFeedStore+ImageDataStore.swift in Sources */,
 				DFE60D302AB215C40028E630 /* FeedLoader.swift in Sources */,
 				DF7D69C82AC9CAAD003A35A5 /* ManagedFeed.swift in Sources */,
 				DF4AD80E2AB22A59005F9AB9 /* RemoteFeedLoader.swift in Sources */,
@@ -900,6 +907,7 @@
 				DF7D6A1A2ACB394E003A35A5 /* ImageDataStore.swift in Sources */,
 				DF7D69BF2AC9C986003A35A5 /* CoreDataFeedStore.swift in Sources */,
 				DF7D6A0D2ACB2783003A35A5 /* CoreData+Helpers.swift in Sources */,
+				DF7D6A232ACC70C1003A35A5 /* CoreDataFeedStore+FeedStore.swift in Sources */,
 				DF3ED1F32ABB1F31000C9770 /* LocalFeedLoader.swift in Sources */,
 				DF3ED1F92ABB2847000C9770 /* RemoteFeedItem.swift in Sources */,
 				DFBE39DB2ABDD09100B31516 /* CodableFeedStore.swift in Sources */,
