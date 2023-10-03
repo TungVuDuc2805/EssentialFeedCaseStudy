@@ -41,22 +41,18 @@ class CoreDataImageDataStoreTests: XCTestCase {
         let sut = makeSUT()
         let url = URL(string: "https://url-0.com")!
         let imageData = anyData()
-        let exp = expectation(description: "wait for completion")
         
         insertError(to: sut, with: url, data: imageData)
         
         var capturedData: Data?
-        sut.retrieve(from: url) { result in
-            switch result {
-            case .success(let data):
-                capturedData = data
-            default:
-                break
-            }
-            exp.fulfill()
+        let result = retrieveResult(from: sut, with: url)
+        switch result {
+        case .success(let data):
+            capturedData = data
+        default:
+            break
         }
         
-        wait(for: [exp], timeout: 0.1)
         XCTAssertEqual(capturedData, imageData)
     }
     
@@ -83,23 +79,19 @@ class CoreDataImageDataStoreTests: XCTestCase {
         let url = URL(string: "https://url-0.com")!
         let firstData = Data("first".utf8)
         let lastData = Data("last".utf8)
-        let exp = expectation(description: "wait for completion")
 
         insertError(to: sut, with: url, data: firstData)
         insertError(to: sut, with: url, data: lastData)
         
         var capturedData: Data?
-        sut.retrieve(from: url) { result in
-            switch result {
-            case .success(let data):
-                capturedData = data
-            default:
-                break
-            }
-            exp.fulfill()
+        let result = retrieveResult(from: sut, with: url)
+        switch result {
+        case .success(let data):
+            capturedData = data
+        default:
+            break
         }
         
-        wait(for: [exp], timeout: 0.1)
         XCTAssertEqual(capturedData, lastData)
     }
  
@@ -133,21 +125,30 @@ class CoreDataImageDataStoreTests: XCTestCase {
     }
     
     private func retrieveError(from sut: CoreDataFeedStore, with url: URL) -> CoreDataFeedStore.ImageDataStoreError? {
+        var capturedError: CoreDataFeedStore.ImageDataStoreError?
+        let result = retrieveResult(from: sut, with: url)
+        
+        switch result {
+        case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
+            capturedError = error
+        default:
+            break
+        }
+        
+        return capturedError
+    }
+    
+    private func retrieveResult(from sut: CoreDataFeedStore, with url: URL) -> ImageDataStore.RetrievalResult? {
         let exp = expectation(description: "wait for completion")
         
-        var capturedError: CoreDataFeedStore.ImageDataStoreError?
+        var capturedResult: ImageDataStore.RetrievalResult?
         sut.retrieve(from: url) { result in
-            switch result {
-            case .failure(let error as CoreDataFeedStore.ImageDataStoreError?):
-                capturedError = error
-            default:
-                break
-            }
+            capturedResult = result
             exp.fulfill()
         }
         
         wait(for: [exp], timeout: 0.1)
-        return capturedError
+        return capturedResult
     }
     
     private func retrieveErrorTwice(from sut: CoreDataFeedStore, with url: URL) -> CoreDataFeedStore.ImageDataStoreError? {

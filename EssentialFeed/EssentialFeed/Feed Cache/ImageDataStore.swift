@@ -10,7 +10,8 @@ import Foundation
 public protocol ImageDataStore {
     typealias DeletionCompletion = (Error?) -> Void
     typealias InsertionCompletion = (Error?) -> Void
-    typealias RetrievalCompletion = (Result<Data, Error>) -> Void
+    typealias RetrievalResult = Result<Data, Error>
+    typealias RetrievalCompletion = (RetrievalResult) -> Void
 
     func deleteImageData(with url: URL, completion: @escaping DeletionCompletion)
     func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion)
