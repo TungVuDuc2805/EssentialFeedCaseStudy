@@ -68,7 +68,7 @@ class CoreDataImageDataStoreTests: XCTestCase {
        XCTAssertNil(insertError(to: sut, with: url, data: imageData))
     }
     
-    func test_insert_hasNoSideEffectsEmptyCache() {
+    func test_insert_hasNoSideEffectsOnEmptyCache() {
         let sut = makeSUT()
         let url = URL(string: "https://url-0.com")!
         let imageData = anyData()
@@ -76,6 +76,31 @@ class CoreDataImageDataStoreTests: XCTestCase {
         insertError(to: sut, with: url, data: imageData)
         
         XCTAssertNil(insertError(to: sut, with: url, data: imageData))
+    }
+    
+    func test_insert_overridesPreviouslyInserted() {
+        let sut = makeSUT()
+        let url = URL(string: "https://url-0.com")!
+        let firstData = Data("first".utf8)
+        let lastData = Data("last".utf8)
+        let exp = expectation(description: "wait for completion")
+
+        insertError(to: sut, with: url, data: firstData)
+        insertError(to: sut, with: url, data: lastData)
+        
+        var capturedData: Data?
+        sut.retrieve(from: url) { result in
+            switch result {
+            case .success(let data):
+                capturedData = data
+            default:
+                break
+            }
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+        XCTAssertEqual(capturedData, lastData)
     }
  
     // MARK: - Helpers
