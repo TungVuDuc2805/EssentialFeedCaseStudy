@@ -25,7 +25,7 @@ extension ManagedImage {
     }
     
     static func first(with url: URL, in context: NSManagedObjectContext) throws -> ManagedImage? {
-        let request = NSFetchRequest<ManagedImage>(entityName: ManagedImage.className())
+        let request = NSFetchRequest<ManagedImage>(entityName: ManagedImage.entity().name!)
         request.predicate = NSPredicate(format: "%K = %@", argumentArray: [#keyPath(ManagedImage.url), url])
         request.returnsObjectsAsFaults = false
         request.fetchLimit = 1

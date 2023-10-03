@@ -19,7 +19,7 @@ public final class FeedPresenter {
     private let feedView: FeedView
     private let loadingView: FeedLoadingView
     
-    static var title: String {
+    public static var title: String {
         return "My Feed"
     }
     

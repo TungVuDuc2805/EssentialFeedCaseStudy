@@ -36,7 +36,7 @@ extension ManagedFeed {
     }
     
     static func find(in context: NSManagedObjectContext) throws -> ManagedFeed? {
-        let request = NSFetchRequest<ManagedFeed>(entityName: ManagedFeed.className())
+        let request = NSFetchRequest<ManagedFeed>(entityName: ManagedFeed.entity().name!)
         request.returnsObjectsAsFaults = false
         let result = try context.fetch(request)
         guard let cache = result.first else {

@@ -351,7 +351,7 @@ class FeedUIIntegrationTests: XCTestCase {
         // MARK: - Image Load
         var loadedImages = [URL]()
         var cancelLoadedImages = [URL]()
-        var imageLoadCompletions = [(Result<Data, Error>) -> Void]()
+        var imageLoadCompletions = [(Swift.Result<Data, Error>) -> Void]()
         
         struct Task: Cancellable {
             var handler: () -> Void

@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EssentialFeed
 
 public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView {
     var feed = [FeedImageCellController]()
@@ -22,7 +23,7 @@ public final class FeedViewController: UITableViewController, UITableViewDataSou
         }
     }
     
-    func display(_ model: FeedLoadingViewModel) {
+    public func display(_ model: FeedLoadingViewModel) {
         if model.isLoading {
             refreshControl?.beginRefreshing()
         } else {
