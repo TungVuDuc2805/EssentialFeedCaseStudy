@@ -59,6 +59,14 @@ class CoreDataImageDataStoreTests: XCTestCase {
         wait(for: [exp], timeout: 0.1)
         XCTAssertEqual(capturedData, imageData)
     }
+    
+    func test_insert_deliversNoErrorOnEmptyCache() {
+        let sut = makeSUT()
+        let url = URL(string: "https://url-0.com")!
+        let imageData = anyData()
+        
+       XCTAssertNil(insertError(to: sut, with: url, data: imageData))
+    }
  
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
