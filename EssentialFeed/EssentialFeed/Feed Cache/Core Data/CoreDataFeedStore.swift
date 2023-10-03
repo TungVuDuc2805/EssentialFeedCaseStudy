@@ -88,7 +88,17 @@ extension CoreDataFeedStore: ImageDataStore {
     }
     
     public func deleteImageData(with url: URL, completion: @escaping DeletionCompletion) {
-        completion(nil)
+        performAsync { context in
+            do {
+                let cache = try ManagedImage.first(with: url, in: context)
+                cache?.data = nil
+                
+                try context.save()
+                completion(nil)
+            } catch {
+                completion(error)
+            }
+        }
     }
     
     public func insert(_ image: Data, with url: URL, completion: @escaping InsertionCompletion) {

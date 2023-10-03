@@ -125,6 +125,31 @@ class CoreDataImageDataStoreTests: XCTestCase {
         wait(for: [exp], timeout: 0.1)
         XCTAssertNil(capturedError)
     }
+    
+    func test_deleteWithURL_emptiesImageURLData() {
+        let sut = makeSUT()
+        let exp = expectation(description: "wait for completion")
+        let url = anyURL()
+        
+        insertError(to: sut, with: url, data: anyData())
+
+        sut.deleteImageData(with: url) { _ in
+            exp.fulfill()
+        }
+        
+        wait(for: [exp], timeout: 0.1)
+        
+        var capturedData: Data?
+        let result = retrieveResult(from: sut, with: url)
+        switch result {
+        case .success(let data):
+            capturedData = data
+        default:
+            break
+        }
+        
+        XCTAssertEqual(capturedData, nil)
+    }
  
     // MARK: - Helpers
     private func makeSUT(file: StaticString = #filePath, line: UInt = #line) -> CoreDataFeedStore {
