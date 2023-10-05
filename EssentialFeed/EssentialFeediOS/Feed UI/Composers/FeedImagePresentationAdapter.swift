@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import EssentialFeed
 
 final class FeedImagePresentationAdapter: FeedView {
     weak var controller: FeedViewController?

@@ -13,14 +13,28 @@ public final class FeedUIComposer {
     private init() {}
     
     public static func composeUIWith(feedLoader: FeedLoader, imageLoader: ImageLoader) -> FeedViewController {
-        let presentationAdapter = FeedLoaderPresentationAdapter(loader: feedLoader)
-        let refreshController = FeedRefreshViewController(loadFeed: presentationAdapter.load)
-        let feedController = FeedViewController(refreshController: refreshController)
+        let presentationAdapter = FeedLoaderPresentationAdapter(loader: MainQueueDispatchingDecorator(decoratee: feedLoader))
+        let feedController = FeedViewController.makeWith(loadFeed: presentationAdapter.load, title: FeedPresenter.title)
         
-        presentationAdapter.presenter = FeedRefreshPresenter(
-            feedView: FeedImagePresentationAdapter(controller: feedController, loader: imageLoader),
-            loadingView: WeakRefProxy(refreshController)
+        presentationAdapter.presenter = FeedPresenter(
+            feedView: FeedImagePresentationAdapter(
+                controller: feedController,
+                loader: MainQueueDispatchingDecorator(decoratee: imageLoader)
+            ),
+            loadingView: WeakRefProxy(feedController)
         )
+        
+        return feedController
+    }
+}
+
+extension FeedViewController {
+    static func makeWith(loadFeed: @escaping () -> Void, title: String) -> FeedViewController {
+        let bundle = Bundle(for: FeedViewController.self)
+        let storyboard = UIStoryboard(name: "Feed", bundle: bundle)
+        let feedController = storyboard.instantiateInitialViewController() as! FeedViewController
+        feedController.loadFeed = loadFeed
+        feedController.title = title
         
         return feedController
     }
