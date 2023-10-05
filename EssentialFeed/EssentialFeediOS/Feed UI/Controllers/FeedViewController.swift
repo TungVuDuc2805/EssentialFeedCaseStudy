@@ -9,7 +9,11 @@ import UIKit
 import EssentialFeed
 
 public final class FeedViewController: UITableViewController, UITableViewDataSourcePrefetching, FeedLoadingView {
-    var feed = [FeedImageCellController]()
+    var feed = [FeedImageCellController]() {
+        didSet {
+            tableView.reloadData()
+        }
+    }
     var loadFeed: (() -> Void)?
 
     private var onViewIsAppearing: ((FeedViewController) -> Void)?
